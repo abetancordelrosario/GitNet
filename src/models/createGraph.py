@@ -2,6 +2,7 @@
 from typing import List
 from github import Github, GithubException
 from graph_tool.all import *
+from numpy import ndarray
 
 class createGraph:
 
@@ -12,15 +13,24 @@ class createGraph:
         self.__client = Github(token, per_page=100)
         self.__repository = self.__client.get_repo(full_name_repository)
 
-    def __init__():
-        pass
-
     
-    def add_nodes_and_edges(self):
-        self.g.add_vertex()
-        v_name = self.g.new_vertex_property("string")
+    def add_nodes_and_edges(self) -> None:
+        vertex = self.g.add_vertex()
+        v_name : VertexPropertyMap = self.g.new_vertex_property("string")
+        v_name[vertex] = self.__repository.name
+    
         stargazers: List = self.__repository.get_stargazers()
-        return 2
+        for stargazer in stargazers:
+            self.g.add_vertex()
+
+
+    def get_graph_vertices(self) -> ndarray:
+        return self.g.get_vertices()
+
+    def get_graph_num_vertices(self) -> int:
+        return self.g.num_vertices()
+
+
         
 
 
