@@ -1,3 +1,4 @@
+import time
 from typing import List
 from xmlrpc.client import boolean
 from github import Github, GithubException
@@ -32,14 +33,20 @@ class createGraph:
         stargazers: List = self.__repository.get_stargazers()
         for index, stargazer in enumerate(stargazers):
             self.create_vertex(stargazer.name, self.__IS_USER)
-            actual_vertex: Vertex = self.g.vertex(index + 1)
-            actual_edge: Edge = self.g.add_edge(actual_vertex,main_vertex)
-            self.__e_relation[actual_edge] = "stars"
+            self.create_edge("stars", index, main_vertex)   
+        
 
-    def create_vertex(self, name: str, type: boolean):
+
+    def create_vertex(self, name: str, type: boolean) -> None:
         vertex = self.g.add_vertex()
         self.__v_name[vertex] = name
         self.__v_is_user[vertex] = type
+
+    def create_edge(self, relation: str, index: int, main_vertex: Vertex) -> None:
+        actual_vertex: Vertex = self.g.vertex(index + 1)
+        actual_edge: Edge = self.g.add_edge(actual_vertex,main_vertex)
+        self.__e_relation[actual_edge] = relation
+
 
 
 
