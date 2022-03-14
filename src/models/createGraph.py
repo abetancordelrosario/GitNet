@@ -1,7 +1,6 @@
 from typing import List
-from warnings import catch_warnings
 from xmlrpc.client import boolean
-from github import Github, GithubException
+from github import Github
 from graph_tool.all import *
 
 class createGraph:
@@ -16,11 +15,21 @@ class createGraph:
     __MAX_REPOS_STARGAZER: int = 20
     __IS_USER: boolean = True
     __IS_REPOSITORY: boolean = False
+    __OPENMP_THREADS: int = 16
+
+    __v_name: VertexPropertyMap 
+    __v_is_user: VertexPropertyMap 
+    __e_relation: EdgePropertyMap 
 
     def __init__(self, full_name_repository : str, token: str) -> None:
         self.g = Graph()
         self.__client = Github(token, per_page=100)
         self.__repository = self.__client.get_repo(full_name_repository)
+        graph_tool.openmp_set_num_threads(self.__OPENMP_THREADS)
+        self.set_graph_properties()
+        
+
+    def set_graph_properties(self) -> None:
         self.__v_name: VertexPropertyMap = self.g.new_vertex_property("string")
         self.__v_is_user: VertexPropertyMap = self.g.new_vertex_property("bool") 
         self.__e_relation: EdgePropertyMap = self.g.new_edge_property("string")
@@ -32,8 +41,8 @@ class createGraph:
         stargazers: List = [sg for sg in self.__repository.get_stargazers()]
         for stargazer in stargazers:
             try:
-                stargazer_vertex: List = graph_tool.util.find_vertex(self.g, self.__v_name, starred.name)
-                self.create_edge("starred", stargazer_vertex, main_vertex)
+                stargazer_vertex: List = graph_tool.util.find_vertex(self.g, self.__v_name, stargazer.login)
+                self.create_edge("starred", stargazer_vertex[0], main_vertex)
             except:
                 new_stargazer_vertex: Vertex = self.create_vertex(stargazer.login, self.__IS_USER)
                 self.create_edge("starred", new_stargazer_vertex, main_vertex)
@@ -57,11 +66,8 @@ class createGraph:
                 except:  
                     starred_repo: Vertex = self.create_vertex(starred.name, self.__IS_REPOSITORY)
                     self.create_edge("starred", new_stargazer_vertex, starred_repo) 
-        
-        marius: List = graph_tool.util.find_vertex(self.g, self.__v_name, "abetancordelrosario")
-        m = marius[0]
-        print(m.in_degree())
-        print(m.out_degree())
+
+                    
 
     def create_vertex(self, name: str, type: boolean) -> Vertex:
         vertex = self.g.add_vertex()
