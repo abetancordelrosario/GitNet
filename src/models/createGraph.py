@@ -62,11 +62,14 @@ class createGraph:
             for starred in stargazer.get_starred()[:self.__MAX_REPOS_STARGAZER]:
                 repeated_repos: List = graph_tool.util.find_vertex(self.g, self.__v_name, starred.name)
                 try:         
-                    self.create_edge("starred", new_stargazer_vertex, repeated_repos[0])
+                    if repeated_repos[0] != main_vertex:        
+                        self.create_edge("starred", new_stargazer_vertex, repeated_repos[0])
                 except:  
                     starred_repo: Vertex = self.create_vertex(starred.name, self.__IS_REPOSITORY)
                     self.create_edge("starred", new_stargazer_vertex, starred_repo) 
-
+        #print(main_vertex.in_degree())
+        #print(main_vertex.out_degree())
+        [print(self.g.vertex(x)) for x in self.g.iter_in_neighbors(main_vertex, vprops=[])]
                     
 
     def create_vertex(self, name: str, type: boolean) -> Vertex:
