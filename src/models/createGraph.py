@@ -42,17 +42,21 @@ class createGraph:
         for stargazer in stargazers:
             try:
                 stargazer_vertex: List = graph_tool.util.find_vertex(self.g, self.__v_name, stargazer.login)
-                self.create_edge("starred", stargazer_vertex[0], main_vertex)
+                new_stargazer_vertex: Vertex = stargazer_vertex[0]
+                self.create_edge("starred", new_stargazer_vertex, main_vertex)
             except:
                 new_stargazer_vertex: Vertex = self.create_vertex(stargazer.login, self.__IS_USER)
                 self.create_edge("starred", new_stargazer_vertex, main_vertex)
-        
+
             for follower in stargazer.get_followers():
                 try:
-                    index =  stargazers.index(follower)
+                    stargazers.index(follower)
                     try:
-                        follower_vertex: Vertex = self.g.vertex(index)
-                        self.create_edge("starred", follower_vertex, new_stargazer_vertex)    
+                        follower_vertex: List = graph_tool.util.find_vertex(self.g, self.__v_name, follower.login)
+                        self.create_edge("starred", follower_vertex[0], new_stargazer_vertex)    
+                        print(stargazer)
+                        print(follower)
+                        print("-----------------------")
                     except:
                         follower_vertex = self.create_vertex(follower.login, self.__IS_USER)
                         self.create_edge("starred", follower_vertex, new_stargazer_vertex)
@@ -62,14 +66,17 @@ class createGraph:
             for starred in stargazer.get_starred()[:self.__MAX_REPOS_STARGAZER]:
                 repeated_repos: List = graph_tool.util.find_vertex(self.g, self.__v_name, starred.name)
                 try:         
-                    if repeated_repos[0] != main_vertex:        
+                    if repeated_repos[0] != main_vertex:      
                         self.create_edge("starred", new_stargazer_vertex, repeated_repos[0])
                 except:  
                     starred_repo: Vertex = self.create_vertex(starred.name, self.__IS_REPOSITORY)
                     self.create_edge("starred", new_stargazer_vertex, starred_repo) 
-        #print(main_vertex.in_degree())
-        #print(main_vertex.out_degree())
-        [print(self.g.vertex(x)) for x in self.g.iter_in_neighbors(main_vertex, vprops=[])]
+
+        follower_vertexx: List = graph_tool.util.find_vertex(self.g, self.__v_name, "marius92mc")
+        [print(self.g.vertex(x)) for x in self.g.iter_in_neighbors(follower_vertexx[0], vprops=[])]
+        print("----------------------------------")
+        xx: List = graph_tool.util.find_vertex(self.g, self.__v_name, "abetancordelrosario")
+        print(xx[0])
                     
 
     def create_vertex(self, name: str, type: boolean) -> Vertex:
