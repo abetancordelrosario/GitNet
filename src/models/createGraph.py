@@ -71,12 +71,6 @@ class createGraph:
                 except:  
                     starred_repo: Vertex = self.create_vertex(starred.name, self.__IS_REPOSITORY)
                     self.create_edge("starred", new_stargazer_vertex, starred_repo) 
-
-        follower_vertexx: List = graph_tool.util.find_vertex(self.g, self.__v_name, "marius92mc")
-        [print(self.g.vertex(x)) for x in self.g.iter_in_neighbors(follower_vertexx[0], vprops=[])]
-        print("----------------------------------")
-        xx: List = graph_tool.util.find_vertex(self.g, self.__v_name, "abetancordelrosario")
-        print(xx[0])
                     
 
     def create_vertex(self, name: str, type: boolean) -> Vertex:
