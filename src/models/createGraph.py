@@ -54,9 +54,6 @@ class createGraph:
                     try:
                         follower_vertex: List = graph_tool.util.find_vertex(self.g, self.__v_name, follower.login)
                         self.create_edge("starred", follower_vertex[0], new_stargazer_vertex)    
-                        print(stargazer)
-                        print(follower)
-                        print("-----------------------")
                     except:
                         follower_vertex = self.create_vertex(follower.login, self.__IS_USER)
                         self.create_edge("starred", follower_vertex, new_stargazer_vertex)
