@@ -1,3 +1,4 @@
+import time
 from typing import List
 from xmlrpc.client import boolean
 from github import Github
@@ -60,6 +61,7 @@ class createGraph:
                 except:
                     pass
 
+
             for starred in stargazer.get_starred()[:self.__MAX_REPOS_STARGAZER]:
                 repeated_repos: List = graph_tool.util.find_vertex(self.g, self.__v_name, starred.name)
                 try:         
@@ -68,6 +70,7 @@ class createGraph:
                 except:  
                     starred_repo: Vertex = self.create_vertex(starred.name, self.__IS_REPOSITORY)
                     self.create_edge("starred", new_stargazer_vertex, starred_repo) 
+
                     
 
     def create_vertex(self, name: str, type: boolean) -> Vertex:
