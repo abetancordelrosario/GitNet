@@ -12,8 +12,8 @@ Set test example graph.
 __token : str = "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"
 __full_name_repository : str =  "marius92mc/github-stargazers" 
 __test_graph: createGraph = createGraph(__full_name_repository, __token)
-__repository_vertices: int = 232
-__repository_edges: int = 239
+__repository_vertices: int = 233
+__repository_edges: int = 238
 
 
 
@@ -36,6 +36,7 @@ def test_add_vertices_and_edges():
         errors.append("Incorrect number of edges")
     if main_v_in != 14 or main_v_out != 0:
         errors.append("Incorrect main vertex degree")
+        print(main_v_in)
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
 
 

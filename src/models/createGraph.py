@@ -3,7 +3,6 @@ from typing import List
 from xmlrpc.client import boolean
 from graph_tool.all import *
 import requests
-import json
 
 class createGraph:
     """
@@ -18,7 +17,6 @@ class createGraph:
     __IS_USER: boolean = True
     __IS_REPOSITORY: boolean = False
     __API_URL = "https://api.github.com/"
-    __ANOTHER_PAGE = False
 
     __v_name: VertexPropertyMap 
     __v_is_user: VertexPropertyMap 
@@ -53,9 +51,7 @@ class createGraph:
             except:
                 new_stargazer_vertex: Vertex = self.create_vertex(stargazer['login'], self.__IS_USER)
                 self.create_edge("starred", new_stargazer_vertex, main_vertex)
-            print("-----------------------------------")
-            print(stargazer['login'])
-            
+
             url = self.__API_URL+"users/%s/followers?per_page=100" % stargazer['login']
             res = self.session.get(url , headers=self.session.headers)
             repos=res.json()
@@ -86,11 +82,7 @@ class createGraph:
                 except:  
                     starred_repo: Vertex = self.create_vertex(starred['name'], self.__IS_REPOSITORY)
                     self.create_edge("starred", new_stargazer_vertex, starred_repo) 
-            
-            self.__ANOTHER_PAGE = True
-
-
-                    
+           
 
     def create_vertex(self, name: str, type: boolean) -> Vertex:
         vertex = self.g.add_vertex()
