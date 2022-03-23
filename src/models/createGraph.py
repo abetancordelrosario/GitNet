@@ -1,8 +1,9 @@
 import time
 from typing import List
 from xmlrpc.client import boolean
-from github import Github
 from graph_tool.all import *
+import requests
+import json
 
 class createGraph:
     """
@@ -16,7 +17,7 @@ class createGraph:
     __MAX_REPOS_STARGAZER: int = 20
     __IS_USER: boolean = True
     __IS_REPOSITORY: boolean = False
-    __OPENMP_THREADS: int = 16
+    __API_URL = "https://api.github.com/"
 
     __v_name: VertexPropertyMap 
     __v_is_user: VertexPropertyMap 
@@ -24,9 +25,9 @@ class createGraph:
 
     def __init__(self, full_name_repository : str, token: str) -> None:
         self.g = Graph()
-        self.__client = Github(token, per_page=100)
-        self.__repository = self.__client.get_repo(full_name_repository)
-        graph_tool.openmp_set_num_threads(self.__OPENMP_THREADS)
+        self.session = requests.Session()
+        self.session.headers['Authorization'] = 'token %s' % token
+        self.full_name_repository = full_name_repository
         self.set_graph_properties()
         
 
@@ -34,7 +35,18 @@ class createGraph:
         self.__v_name: VertexPropertyMap = self.g.new_vertex_property("string")
         self.__v_is_user: VertexPropertyMap = self.g.new_vertex_property("bool") 
         self.__e_relation: EdgePropertyMap = self.g.new_edge_property("string")
-    
+
+    def prueba(self):
+        # Obtener repositorio
+        repositorio = self.session.get(self.__API_URL+"repos/%s" % self.full_name_repository , headers=self.session.headers)
+
+        # Obtener stargazers
+        stargazers = self.session.get(self.__API_URL+"repos/%s/stargazers" % self.full_name_repository , headers=self.session.headers)
+        for stargazer in stargazers.json():
+            print("stargazer")
+
+
+'''   
     def add_vertices_and_edges(self) -> None:
         self.create_vertex(self.__repository.name, self.__IS_REPOSITORY)
         main_vertex: Vertex = self.g.vertex(0)
@@ -83,7 +95,7 @@ class createGraph:
         actual_edge: Edge = self.g.add_edge(actual_vertex,main_vertex)
         self.__e_relation[actual_edge] = relation
 
-
+'''
 
 
 
