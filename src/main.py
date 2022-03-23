@@ -4,8 +4,8 @@ import time
 
 
 def main() -> None:   
-    # graph = createGraph("marius92mc/github-stargazers","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")
-    graph = createGraph("yavallejo/tallerwordpress","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")
+    graph = createGraph("marius92mc/github-stargazers","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")
+    # graph = createGraph("yavallejo/tallerwordpress","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")
     initialTime = time.time()
     graph.add_vertices_and_edges()
     # graph.prueba()
@@ -14,3 +14,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+# 
