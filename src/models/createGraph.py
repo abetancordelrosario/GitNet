@@ -44,9 +44,15 @@ class createGraph:
         self.create_vertex(main_repository.json() ['name'], self.__IS_REPOSITORY)
         main_vertex: Vertex = self.g.vertex(0)
         
-        stargazers_request: response = self.session.get(self.__API_URL+"repos/%s/stargazers?per_page=100" % self.full_name_repository , headers=self.session.headers)
-        stargazers_login: List = [st['login'] for st in stargazers_request.json()]
-        for stargazer in stargazers_request.json():
+        stargazers_response: response = self.session.get(self.__API_URL+"repos/%s/stargazers?per_page=100" % self.full_name_repository , headers=self.session.headers)
+        stargazers: json = stargazers_response.json()
+
+        while 'next' in stargazers_response.links.keys():
+            stargazers_response: response = requests.get(stargazers_response.links['next']['url'], headers=self.session.headers)
+            stargazers.extend(stargazers_response.json())
+        
+        stargazers_login: List = [st['login'] for st in stargazers]
+        for stargazer in stargazers:
             try:
                 #If the vertex doesn't exists.
                 stargazer_vertex: List = graph_tool.util.find_vertex(self.g, self.__v_name, stargazer['login'])
@@ -62,12 +68,12 @@ class createGraph:
 
     def add_follower_relationship(self, stargazers_login: List, stargazer: json, new_vertex: Vertex) -> None:
         user_followers_url: str = self.__API_URL+"users/%s/followers?per_page=100" % stargazer['login']
-        response: response = self.session.get(user_followers_url , headers=self.session.headers)
-        followers: json = response.json()
+        followers_response: response = self.session.get(user_followers_url , headers=self.session.headers)
+        followers: json = followers_response.json()
 
-        while 'next' in response.links.keys():
-            response = requests.get(response.links['next']['url'], headers=self.session.headers)
-            followers.extend(response.json())
+        while 'next' in followers_response.links.keys():
+            followers_response: response = requests.get(followers_response.links['next']['url'], headers=self.session.headers)
+            followers.extend(followers_response.json())
 
         for follower in followers:
             try:
@@ -84,8 +90,8 @@ class createGraph:
 
     def add_starred_repos(self, stargazer: json, new_vertex: Vertex, main_vertex: Vertex):
         starred_repos: response = self.session.get(self.__API_URL+"users/%s/starred?per_page=20" % stargazer['login'] , headers=self.session.headers)
-        
-        for starred in starred_repos.json()[:self.__MAX_REPOS_STARGAZER]:
+
+        for starred in starred_repos.json():
             repeated_repos: List = graph_tool.util.find_vertex(self.g, self.__v_name, starred['name'])
             try:  
                 # If repo vertex already exist and is not the main vertex    
@@ -105,6 +111,7 @@ class createGraph:
     def create_edge(self, relation: str, actual_vertex: Vertex, main_vertex: Vertex) -> None:
         actual_edge: Edge = self.g.add_edge(actual_vertex,main_vertex)
         self.__e_relation[actual_edge] = relation
+
 
   
 
