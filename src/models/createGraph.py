@@ -25,7 +25,7 @@ class createGraph:
     __v_is_user: VertexPropertyMap 
     __e_relation: EdgePropertyMap 
 
-    def __init__(self, full_name_repository : str, token: str) -> None:
+    def __init__(self, full_name_repository: str, token: str) -> None:
         self.g = Graph(directed=True)
         self.session = requests.Session()
         self.session.headers['Authorization'] = 'token %s' % token
@@ -94,7 +94,7 @@ class createGraph:
         for starred in starred_repos.json():
             repeated_repos: List = graph_tool.util.find_vertex(self.g, self.__v_name, starred['name'])
             try:  
-                # If repo vertex already exist and is not the main vertex    
+                # If repo vertex already exists and is not the main vertex    
                 if repeated_repos[0] != main_vertex:      
                     self.create_edge("starred", new_vertex, repeated_repos[0])
             except:  
