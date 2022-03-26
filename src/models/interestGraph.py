@@ -17,6 +17,7 @@ class interestGraph:
     """
 
     __MAX_REPOS_STARGAZER: int = 20
+    __MAX_NUMBER_ITEMS: int = 100
     __IS_USER: boolean = True
     __IS_REPOSITORY: boolean = False
     __API_URL = "https://api.github.com/"
@@ -39,18 +40,13 @@ class interestGraph:
         self.__e_relation: EdgePropertyMap = self.g.new_edge_property("string")
 
 
-    def add_vertices_and_edges(self) -> None:
-        main_repository: response = self.session.get(self.__API_URL+"repos/%s" % self.full_name_repository , headers=self.session.headers)
-        a = self.create_vertex(main_repository.json() ['name'], self.__IS_REPOSITORY)
+    def create_graph(self) -> None:
+        main_repo_url: str = self.__API_URL+"repos/%s" % self.full_name_repository
+        main_repository: response = self.session.get(main_repo_url , headers=self.session.headers)
+        self.create_vertex(main_repository.json() ['name'], self.__IS_REPOSITORY)
         main_vertex: Vertex = self.g.vertex(0)
         
-        stargazers_response: response = self.session.get(self.__API_URL+"repos/%s/stargazers?per_page=100" % self.full_name_repository , headers=self.session.headers)
-        stargazers: json = stargazers_response.json()
-
-        while 'next' in stargazers_response.links.keys():
-            stargazers_response: response = requests.get(stargazers_response.links['next']['url'], headers=self.session.headers)
-            stargazers.extend(stargazers_response.json())
-        
+        stargazers: json = self.request_api(None, self.__MAX_NUMBER_ITEMS, "stargazers", True)
         stargazers_login: List = [st['login'] for st in stargazers]
         for stargazer in stargazers:
             try:
@@ -67,13 +63,7 @@ class interestGraph:
 
 
     def add_follower_relationship(self, stargazers_login: List, stargazer: json, new_vertex: Vertex) -> None:
-        user_followers_url: str = self.__API_URL+"users/%s/followers?per_page=100" % stargazer['login']
-        followers_response: response = self.session.get(user_followers_url , headers=self.session.headers)
-        followers: json = followers_response.json()
-
-        while 'next' in followers_response.links.keys():
-            followers_response: response = requests.get(followers_response.links['next']['url'], headers=self.session.headers)
-            followers.extend(followers_response.json())
+        followers: json = self.request_api(stargazer, self.__MAX_NUMBER_ITEMS, "followers", False)
 
         for follower in followers:
             try:
@@ -89,9 +79,9 @@ class interestGraph:
                     pass
 
     def add_starred_repos(self, stargazer: json, new_vertex: Vertex, main_vertex: Vertex):
-        starred_repos: response = self.session.get(self.__API_URL+"users/%s/starred?per_page=20" % stargazer['login'] , headers=self.session.headers)
+        starred_repos: json = self.request_api(stargazer, self.__MAX_REPOS_STARGAZER, "starred", False)
 
-        for starred in starred_repos.json():
+        for starred in starred_repos:
             repeated_repos: List = graph_tool.util.find_vertex(self.g, self.__v_name, starred['name'])
             try:  
                 # If repo vertex already exists and is not the main vertex    
@@ -114,6 +104,21 @@ class interestGraph:
 
     def get_graph_properties(self) -> Tuple[VertexPropertyMap, VertexPropertyMap, EdgePropertyMap]:
         return self.__v_name, self.__v_is_user, self.__e_relation
+
+    def request_api(self, stargazer: json, num_items: int, info: str, is_repo_url: boolean) -> json:
+        if is_repo_url:
+            url: str = self.__API_URL+"repos/%s/%s?per_page=%d" % (self.full_name_repository, info, num_items)
+        else:
+            url: str = self.__API_URL+"users/%s/%s?per_page=%d" % (stargazer['login'], info, num_items)
+
+        api_response = response = self.session.get(url , headers=self.session.headers)
+        response_json: json = api_response.json()
+        if info != "starred":
+            while 'next' in api_response.links.keys():
+                api_response: response = requests.get(api_response.links['next']['url'], headers=self.session.headers)
+                response_json.extend(api_response.json())
+
+        return response_json
 
 
   
