@@ -3,14 +3,14 @@ from xmlrpc.client import boolean
 import pytest
 import sys
 sys.path.insert(0, '..')
-from src.models.createGraph import createGraph
+from models.interestGraph import interestGraph
 
 """
 Set test example graph.
 """
 __token : str = "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"
 __full_name_repository : str =  "marius92mc/github-stargazers" 
-__test_graph: createGraph = createGraph(__full_name_repository, __token)
+__test_graph: interestGraph = interestGraph(__full_name_repository, __token)
 __repository_vertices: int = 232
 __repository_edges: int = 237
 

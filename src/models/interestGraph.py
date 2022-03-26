@@ -1,12 +1,12 @@
 import json
 from pickle import FALSE
-from typing import List
+from typing import List, Tuple
 from urllib import response
 from xmlrpc.client import boolean
 from graph_tool.all import *
 import requests
 
-class createGraph:
+class interestGraph:
     """
     Creates a interest graph that includes the repository selected, the stargazers
     of this repository, the relationships between them and the starred repositories 
@@ -41,7 +41,7 @@ class createGraph:
 
     def add_vertices_and_edges(self) -> None:
         main_repository: response = self.session.get(self.__API_URL+"repos/%s" % self.full_name_repository , headers=self.session.headers)
-        self.create_vertex(main_repository.json() ['name'], self.__IS_REPOSITORY)
+        a = self.create_vertex(main_repository.json() ['name'], self.__IS_REPOSITORY)
         main_vertex: Vertex = self.g.vertex(0)
         
         stargazers_response: response = self.session.get(self.__API_URL+"repos/%s/stargazers?per_page=100" % self.full_name_repository , headers=self.session.headers)
@@ -111,6 +111,9 @@ class createGraph:
     def create_edge(self, relation: str, actual_vertex: Vertex, main_vertex: Vertex) -> None:
         actual_edge: Edge = self.g.add_edge(actual_vertex,main_vertex)
         self.__e_relation[actual_edge] = relation
+
+    def get_graph_properties(self) -> Tuple[VertexPropertyMap, VertexPropertyMap, EdgePropertyMap]:
+        return self.__v_name, self.__v_is_user, self.__e_relation
 
 
   
