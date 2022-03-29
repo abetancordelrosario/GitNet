@@ -41,16 +41,13 @@ class interestGraph:
 
 
     def create_graph(self) -> None:
-        main_repo_url: str = self.__API_URL+"repos/%s" % self.full_name_repository
-        main_repository: response = self.session.get(main_repo_url , headers=self.session.headers)
-        self.create_vertex(main_repository.json() ['name'], self.__IS_REPOSITORY)
-        main_vertex: Vertex = self.g.vertex(0)
+        main_vertex: Vertex = self.create_main_vertex()
         
         stargazers: json = self.request_api(None, self.__MAX_NUMBER_ITEMS, "stargazers", True)
         stargazers_login: List = [st['login'] for st in stargazers]
         for stargazer in stargazers:
             try:
-                #If the vertex doesn't exists.
+                #If the vertex already exists.
                 stargazer_vertex: List = graph_tool.util.find_vertex(self.g, self.__v_name, stargazer['login'])
                 new_stargazer_vertex: Vertex = stargazer_vertex[0]
                 self.create_edge("starred", new_stargazer_vertex, main_vertex)
@@ -91,7 +88,14 @@ class interestGraph:
                 starred_repo: Vertex = self.create_vertex(starred['name'], self.__IS_REPOSITORY)
                 self.create_edge("starred", new_vertex, starred_repo) 
            
-    
+    def create_main_vertex(self) -> Vertex:
+        main_repo_url: str = self.__API_URL+"repos/%s" % self.full_name_repository
+        main_repository: response = self.session.get(main_repo_url , headers=self.session.headers)
+        self.create_vertex(main_repository.json() ['name'], self.__IS_REPOSITORY)
+        main_vertex: Vertex = self.g.vertex(0)
+        return main_vertex
+        
+
     def create_vertex(self, name: str, type: boolean) -> Vertex:
         vertex = self.g.add_vertex()
         self.__v_name[vertex] = name
