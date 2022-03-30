@@ -8,7 +8,7 @@ def main() -> None:
     # graph = createGraph("yavallejo/tallerwordpress","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")
     initialTime = time.time()
     graph.create_graph()
-    algorithms.page_rank(graph)
+    algorithms.page_rank(graph, "user")
     
     # graph.prueba()
     print("Tiempo que tarda en ejecutar el programa:", (time.time() - initialTime), "seconds")

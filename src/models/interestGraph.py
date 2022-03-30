@@ -24,6 +24,7 @@ class interestGraph:
 
     __v_name: VertexPropertyMap 
     __v_is_user: VertexPropertyMap 
+    __v_is_repo: VertexPropertyMap 
     __e_relation: EdgePropertyMap 
 
     def __init__(self, full_name_repository: str, token: str) -> None:
@@ -37,6 +38,7 @@ class interestGraph:
     def set_graph_properties(self) -> None:
         self.__v_name: VertexPropertyMap = self.g.new_vertex_property("string")
         self.__v_is_user: VertexPropertyMap = self.g.new_vertex_property("bool") 
+        self.__v_is_repo: VertexPropertyMap = self.g.new_vertex_property("bool") 
         self.__e_relation: EdgePropertyMap = self.g.new_edge_property("string")
 
 
@@ -99,7 +101,10 @@ class interestGraph:
     def create_vertex(self, name: str, type: boolean) -> Vertex:
         vertex = self.g.add_vertex()
         self.__v_name[vertex] = name
-        self.__v_is_user[vertex] = type
+        if type == self.__IS_USER:
+            self.__v_is_user[vertex] = True
+        else:
+            self.__v_is_repo[vertex] = True 
         return vertex
 
     def create_edge(self, relation: str, actual_vertex: Vertex, main_vertex: Vertex) -> None:
@@ -107,7 +112,7 @@ class interestGraph:
         self.__e_relation[actual_edge] = relation
 
     def get_graph_properties(self) -> Tuple[VertexPropertyMap, VertexPropertyMap, EdgePropertyMap]:
-        return self.__v_name, self.__v_is_user, self.__e_relation
+        return self.__v_name, self.__v_is_user, self.__v_is_repo
 
     def request_api(self, stargazer: json, num_items: int, info: str, is_repo_url: boolean) -> json:
         if is_repo_url:
@@ -125,7 +130,6 @@ class interestGraph:
         return response_json
 
 
-  
 
 
 
