@@ -1,5 +1,4 @@
 import string
-from unittest import result
 from graph_tool.all import *
 from models import interestGraph
 
