@@ -49,7 +49,7 @@ class interestGraph:
         for stargazer in stargazers:
             try:
                 #If the vertex already exists.
-                stargazer_vertex: List = graph_tool.util.find_vertex(self.g, self.__v_name, stargazer['login'])
+                stargazer_vertex: List = find_vertex(self.g, self.__v_name, stargazer['login'])
                 new_stargazer_vertex: Vertex = stargazer_vertex[0]
                 self.create_edge("starred", new_stargazer_vertex, main_vertex)
             except:
@@ -61,14 +61,14 @@ class interestGraph:
 
 
     def add_follower_relationship(self, stargazer: json, new_vertex: Vertex, stargazers: list) -> None:
-        followers: json = self.request_api(stargazer, self.__MAX_NUMBER_ITEMS, "followers", False)
+        followers: list = self.request_api(stargazer, self.__MAX_NUMBER_ITEMS, "followers", False)
 
         for follower in followers:
             try:
                 stargazers.index(follower)
                 try:
                     # If the follower vertex already exists
-                    follower_vertex: List = graph_tool.util.find_vertex(self.g, self.__v_name, follower['login'])
+                    follower_vertex: List = find_vertex(self.g, self.__v_name, follower['login'])
                     self.create_edge("follows", follower_vertex[0], new_vertex)  
                 except:
                     follower_vertex = self.create_vertex(follower['login'], self.__IS_USER)
@@ -77,10 +77,10 @@ class interestGraph:
                     pass
 
     def add_starred_repos(self, stargazer: json, new_vertex: Vertex, main_vertex: Vertex):
-        starred_repos: json = self.request_api(stargazer, self.__MAX_REPOS_STARGAZER, "starred", False)
+        starred_repos: list = self.request_api(stargazer, self.__MAX_REPOS_STARGAZER, "starred", False)
 
         for starred in starred_repos:
-            repeated_repos: List = graph_tool.util.find_vertex(self.g, self.__v_name, starred['name'])
+            repeated_repos: List = find_vertex(self.g, self.__v_name, starred['name'])
             try:  
                 # If repo vertex already exists and is not the main vertex    
                 if repeated_repos[0] != main_vertex:      
@@ -110,8 +110,6 @@ class interestGraph:
         actual_edge: Edge = self.g.add_edge(actual_vertex,main_vertex)
         self.__e_relation[actual_edge] = relation
 
-    def get_graph_properties(self) -> Tuple[VertexPropertyMap, VertexPropertyMap, EdgePropertyMap]:
-        return self.__v_name, self.__v_is_user, self.__v_is_repo
 
     def request_api(self, stargazer: json, num_items: int, info: str, is_repo_url: boolean) -> list:
         if is_repo_url:
@@ -127,6 +125,10 @@ class interestGraph:
                 response_json.extend(api_response.json())
 
         return response_json
+
+
+    def get_graph_properties(self) -> list:
+        return [self.__v_name, self.__v_is_user, self.__v_is_repo]
 
 
 

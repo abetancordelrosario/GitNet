@@ -8,8 +8,11 @@ class algorithms:
         pass
 
     def get_relevant_users(graph: interestGraph):
-        v_name, v_is_user, v_is_repo = graph.get_graph_properties()
+        graph_properties: list = graph.get_graph_properties()
+        v_name: VertexPropertyMap = graph_properties[0]
+        v_is_user: VertexPropertyMap = graph_properties[1]
         sub_graph = GraphView(graph.g, v_is_user)
+        
         pr = graph_tool.centrality.pagerank(sub_graph)
         results: list = [(v_name[item], pr[item]) for item in sub_graph.vertices()]
  
@@ -21,9 +24,11 @@ class algorithms:
 
 
     def get_relevant_repos(graph: interestGraph):
-        pr = graph_tool.centrality.pagerank(graph.g) 
-        v_name, v_is_user, v_is_repo = graph.get_graph_properties()
+        graph_properties: list = graph.get_graph_properties()
+        v_name: VertexPropertyMap = graph_properties[0]
+        v_is_repo: VertexPropertyMap = graph_properties[1]
         
+        pr = graph_tool.centrality.pagerank(graph.g)
         results: list = [] 
         for item in graph.g.vertices():
             if v_is_repo[item] == 1:
