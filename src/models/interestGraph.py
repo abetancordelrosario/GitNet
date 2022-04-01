@@ -45,8 +45,7 @@ class interestGraph:
     def create_graph(self) -> None:
         main_vertex: Vertex = self.create_main_vertex()
         
-        stargazers: json = self.request_api(None, self.__MAX_NUMBER_ITEMS, "stargazers", True)
-        stargazers_login: List = [st['login'] for st in stargazers]
+        stargazers: list = self.request_api(None, self.__MAX_NUMBER_ITEMS, "stargazers", True)
         for stargazer in stargazers:
             try:
                 #If the vertex already exists.
@@ -57,23 +56,23 @@ class interestGraph:
                 new_stargazer_vertex: Vertex = self.create_vertex(stargazer['login'], self.__IS_USER)
                 self.create_edge("starred", new_stargazer_vertex, main_vertex)
 
-            self.add_follower_relationship(stargazers_login, stargazer, new_stargazer_vertex)
+            self.add_follower_relationship(stargazer, new_stargazer_vertex, stargazers)
             self.add_starred_repos(stargazer, new_stargazer_vertex, main_vertex)
 
 
-    def add_follower_relationship(self, stargazers_login: List, stargazer: json, new_vertex: Vertex) -> None:
+    def add_follower_relationship(self, stargazer: json, new_vertex: Vertex, stargazers: list) -> None:
         followers: json = self.request_api(stargazer, self.__MAX_NUMBER_ITEMS, "followers", False)
 
         for follower in followers:
             try:
-                stargazers_login.index(follower['login'])
+                stargazers.index(follower)
                 try:
                     # If the follower vertex already exists
                     follower_vertex: List = graph_tool.util.find_vertex(self.g, self.__v_name, follower['login'])
-                    self.create_edge("starred", follower_vertex[0], new_vertex)  
+                    self.create_edge("follows", follower_vertex[0], new_vertex)  
                 except:
                     follower_vertex = self.create_vertex(follower['login'], self.__IS_USER)
-                    self.create_edge("starred", follower_vertex, new_vertex)
+                    self.create_edge("follows", follower_vertex, new_vertex)
             except:
                     pass
 
@@ -114,14 +113,14 @@ class interestGraph:
     def get_graph_properties(self) -> Tuple[VertexPropertyMap, VertexPropertyMap, EdgePropertyMap]:
         return self.__v_name, self.__v_is_user, self.__v_is_repo
 
-    def request_api(self, stargazer: json, num_items: int, info: str, is_repo_url: boolean) -> json:
+    def request_api(self, stargazer: json, num_items: int, info: str, is_repo_url: boolean) -> list:
         if is_repo_url:
             url: str = self.__API_URL+"repos/%s/%s?per_page=%d" % (self.full_name_repository, info, num_items)
         else:
             url: str = self.__API_URL+"users/%s/%s?per_page=%d" % (stargazer['login'], info, num_items)
 
         api_response = response = self.session.get(url , headers=self.session.headers)
-        response_json: json = api_response.json()
+        response_json: list = api_response.json()
         if info != "starred":
             while 'next' in api_response.links.keys():
                 api_response: response = requests.get(api_response.links['next']['url'], headers=self.session.headers)

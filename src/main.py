@@ -9,11 +9,13 @@ def command_line() -> None:
 
 def main() -> None:   
     graph = interestGraph("marius92mc/github-stargazers","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")
-    # graph = createGraph("yavallejo/tallerwordpress","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")
+
     initialTime = time.time()
+    
     graph.create_graph()
     
-    algorithms.page_rank(graph, "user")
+    algorithms.get_relevant_users(graph)
+    algorithms.get_relevant_repos(graph)
     # draw.draw_graph(graph)
     
     # graph.prueba()
