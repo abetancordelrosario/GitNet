@@ -46,13 +46,11 @@ class interestGraph:
         main_vertex: Vertex = self.create_main_vertex()
         
         stargazers: list = self.request_api(None, self.__MAX_NUMBER_ITEMS, "stargazers", True)
-        for a ,stargazer in enumerate(stargazers):
-            print(a)
+        for stargazer in stargazers:
             try:
                 #If the vertex already exists.
                 stargazer_vertex: List = find_vertex(self.g, self.__v_name, stargazer['login'])
-                new_stargazer_vertex: Vertex = stargazer_vertex[0]
-                self.create_edge("starred", new_stargazer_vertex, main_vertex)
+                self.create_edge("starred", stargazer_vertex[0], main_vertex)
             except:
                 new_stargazer_vertex: Vertex = self.create_vertex(stargazer, self.__IS_USER)
                 self.create_edge("starred", new_stargazer_vertex, main_vertex)
