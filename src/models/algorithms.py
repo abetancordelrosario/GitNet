@@ -69,5 +69,6 @@ class algorithms:
                 languages[v_repo_lang[repo]] = 1
         
         lang = dict(sorted(languages.items(), key=lambda item: item[1], reverse = True))
+        
         for key,value in islice(lang.items(), 0, 10):
 	        print(key, ':', value)
