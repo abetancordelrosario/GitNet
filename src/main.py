@@ -1,8 +1,7 @@
-import click
 from command import command
 from models.draw import draw
 from models.interestGraph import interestGraph
-from models.algorithms import algorithms  
+from models.dataProcessing import dataProcessing  
 import time
 
 
@@ -13,15 +12,16 @@ def command_line() -> None:
 
 
 def main() -> None:   
-    graph = interestGraph("marius92mc/github-stargazers","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")
-    # graph = interestGraph("azat-co/react","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")
+
     initialTime = time.time()
+
+    graph = interestGraph("marius92mc/github-stargazers","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")
     
     graph.create_graph()
     
-    algorithms.get_relevant_users(graph)
-    algorithms.get_relevant_repos(graph)
-    algorithms.get_languages(graph)
+    dataProcessing.get_relevant_users(graph)
+    dataProcessing.get_relevant_repos(graph)
+    dataProcessing.get_languages(graph)
     # draw.draw_graph(graph)
 
     print("Tiempo que tarda en ejecutar el programa:", (time.time() - initialTime), "seconds")

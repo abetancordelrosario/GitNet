@@ -1,10 +1,6 @@
-import json
-from pickle import FALSE
-from typing import List, Tuple
-from urllib import response
-from xmlrpc.client import boolean
 from graph_tool.all import *
 import requests
+import json
 
 class interestGraph:
     """
@@ -18,8 +14,8 @@ class interestGraph:
 
     __MAX_REPOS_STARGAZER: int = 20
     __MAX_NUMBER_ITEMS: int = 100
-    __IS_USER: boolean = True
-    __IS_REPOSITORY: boolean = False
+    __IS_USER: bool = True
+    __IS_REPOSITORY: bool = False
     __API_URL = "https://api.github.com/"
 
 
@@ -47,11 +43,11 @@ class interestGraph:
         
         stargazers: list = self.request_api(None, self.__MAX_NUMBER_ITEMS, "stargazers", True)
         for stargazer in stargazers:
-            try:
+            stargazer_vertex: list = find_vertex(self.g, self.__v_name, stargazer['login'])
+            if stargazer_vertex:
                 #If the vertex already exists.
-                stargazer_vertex: List = find_vertex(self.g, self.__v_name, stargazer['login'])
                 self.create_edge("starred", stargazer_vertex[0], main_vertex)
-            except:
+            else:
                 new_stargazer_vertex: Vertex = self.create_vertex(stargazer, self.__IS_USER)
                 self.create_edge("starred", new_stargazer_vertex, main_vertex)
 
@@ -65,11 +61,11 @@ class interestGraph:
         for follower in followers:
             try:
                 stargazers.index(follower)
-                try:
+                follower_vertex: list = find_vertex(self.g, self.__v_name, follower['login'])
+                if follower_vertex:
                     # If the follower vertex already exists
-                    follower_vertex: List = find_vertex(self.g, self.__v_name, follower['login'])
                     self.create_edge("follows", follower_vertex[0], new_vertex)  
-                except:
+                else:
                     follower_vertex = self.create_vertex(follower, self.__IS_USER)
                     self.create_edge("follows", follower_vertex, new_vertex)
             except:
@@ -79,24 +75,24 @@ class interestGraph:
         starred_repos: list = self.request_api(stargazer, self.__MAX_REPOS_STARGAZER, "starred", False)
 
         for starred in starred_repos:
-            repeated_repos: List = find_vertex(self.g, self.__v_name, starred['name'])
-            try:  
+            repeated_repos: list = find_vertex(self.g, self.__v_name, starred['name'])
+            if repeated_repos:
                 # If repo vertex already exists and is not the main vertex    
                 if repeated_repos[0] != main_vertex:      
                     self.create_edge("starred", new_vertex, repeated_repos[0])
-            except:  
+            else:
                 starred_repo: Vertex = self.create_vertex(starred, self.__IS_REPOSITORY)
                 self.create_edge("starred", new_vertex, starred_repo) 
            
     def create_main_vertex(self) -> Vertex:
         main_repo_url: str = self.__API_URL+"repos/%s" % self.full_name_repository
-        main_repository: response = self.session.get(main_repo_url , headers=self.session.headers)
+        main_repository = self.session.get(main_repo_url , headers=self.session.headers)
         self.create_vertex(main_repository.json() , self.__IS_REPOSITORY)
         main_vertex: Vertex = self.g.vertex(0)
         return main_vertex
         
 
-    def create_vertex(self, vertex_info: json, type: boolean) -> Vertex:
+    def create_vertex(self, vertex_info: json, type: bool) -> Vertex:
         vertex = self.g.add_vertex()
         if type == self.__IS_USER:
             self.__v_is_user[vertex] = True
@@ -115,17 +111,17 @@ class interestGraph:
         self.__e_relation[actual_edge] = relation
 
 
-    def request_api(self, stargazer: json, num_items: int, info: str, is_repo_url: boolean) -> list:
+    def request_api(self, stargazer: json, num_items: int, info: str, is_repo_url: bool) -> list:
         if is_repo_url:
             url: str = self.__API_URL+"repos/%s/%s?per_page=%d" % (self.full_name_repository, info, num_items)
         else:
             url: str = self.__API_URL+"users/%s/%s?per_page=%d" % (stargazer['login'], info, num_items)
 
-        api_response: response = self.session.get(url , headers=self.session.headers)
+        api_response = self.session.get(url , headers=self.session.headers)
         response_json: list = api_response.json()
         if info != "starred":
             while 'next' in api_response.links.keys():
-                api_response: response = requests.get(api_response.links['next']['url'], headers=self.session.headers)
+                api_response = requests.get(api_response.links['next']['url'], headers=self.session.headers)
                 response_json.extend(api_response.json())
 
         return response_json
@@ -136,7 +132,11 @@ class interestGraph:
                 self.__v_is_user, 
                 self.__v_is_repo, 
                 self.__v_repo_st,
-                self.__v_repo_lang]
+                self.__v_repo_lang,
+                self.__v_repo_forks,
+                self.__v_repo_date]
+
+
 
 
 

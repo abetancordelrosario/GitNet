@@ -3,7 +3,7 @@ from pydoc import pager
 import click
 from models.draw import draw
 from models.interestGraph import interestGraph
-from models.algorithms import algorithms  
+from models.dataProcessing import dataProcessing  
 import cmd
 
 class REPL(cmd.Cmd):
