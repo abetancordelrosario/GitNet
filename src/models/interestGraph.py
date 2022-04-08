@@ -1,6 +1,11 @@
+from enum import Enum, auto
 from graph_tool.all import *
 import requests
 import json
+
+class relationship(Enum):
+    STARRED = "starred"
+    FOLLOWS = "follows"
 
 class interestGraph:
     """
@@ -45,11 +50,11 @@ class interestGraph:
         for stargazer in stargazers:
             stargazer_vertex: list = find_vertex(self.g, self.__v_name, stargazer['login'])
             if stargazer_vertex:
-                #If the vertex already exists.
-                self.create_edge("starred", stargazer_vertex[0], main_vertex)
+                new_stargazer_vertex: Vertex = stargazer_vertex[0]
+                self.create_edge(relationship.STARRED, new_stargazer_vertex, main_vertex)
             else:
                 new_stargazer_vertex: Vertex = self.create_vertex(stargazer, self.__IS_USER)
-                self.create_edge("starred", new_stargazer_vertex, main_vertex)
+                self.create_edge(relationship.STARRED, new_stargazer_vertex, main_vertex)
 
             self.add_follower_relationship(stargazer, new_stargazer_vertex, stargazers)
             self.add_starred_repos(stargazer, new_stargazer_vertex, main_vertex)
@@ -63,11 +68,10 @@ class interestGraph:
                 stargazers.index(follower)
                 follower_vertex: list = find_vertex(self.g, self.__v_name, follower['login'])
                 if follower_vertex:
-                    # If the follower vertex already exists
-                    self.create_edge("follows", follower_vertex[0], new_vertex)  
+                    self.create_edge(relationship.FOLLOWS, follower_vertex[0], new_vertex)  
                 else:
                     follower_vertex = self.create_vertex(follower, self.__IS_USER)
-                    self.create_edge("follows", follower_vertex, new_vertex)
+                    self.create_edge(relationship.FOLLOWS, follower_vertex, new_vertex)
             except:
                     pass
 
@@ -77,12 +81,11 @@ class interestGraph:
         for starred in starred_repos:
             repeated_repos: list = find_vertex(self.g, self.__v_name, starred['name'])
             if repeated_repos:
-                # If repo vertex already exists and is not the main vertex    
                 if repeated_repos[0] != main_vertex:      
-                    self.create_edge("starred", new_vertex, repeated_repos[0])
+                    self.create_edge(relationship.STARRED, new_vertex, repeated_repos[0])
             else:
                 starred_repo: Vertex = self.create_vertex(starred, self.__IS_REPOSITORY)
-                self.create_edge("starred", new_vertex, starred_repo) 
+                self.create_edge(relationship.STARRED, new_vertex, starred_repo) 
            
     def create_main_vertex(self) -> Vertex:
         main_repo_url: str = self.__API_URL+"repos/%s" % self.full_name_repository
@@ -126,15 +129,26 @@ class interestGraph:
 
         return response_json
 
+    def get_name(self) -> VertexPropertyMap:
+        return self.__v_name
 
-    def get_graph_properties(self) -> list:
-        return [self.__v_name, 
-                self.__v_is_user, 
-                self.__v_is_repo, 
-                self.__v_repo_st,
-                self.__v_repo_lang,
-                self.__v_repo_forks,
-                self.__v_repo_date]
+    def get_is_user(self) -> VertexPropertyMap:
+        return self.__v_is_user
+
+    def get_is_repo(self) -> VertexPropertyMap:
+        return self.__v_is_repo
+
+    def get_repo_st(self) -> VertexPropertyMap:
+        return self.__v_repo_st
+
+    def get_repo_lang(self) -> VertexPropertyMap:
+        return self.__v_repo_lang
+
+    def get_repo_forks(self) -> VertexPropertyMap:
+        return self.__v_repo_forks
+
+    def get_repo_date(self) -> VertexPropertyMap:
+        return self.__v_repo_date
 
 
 

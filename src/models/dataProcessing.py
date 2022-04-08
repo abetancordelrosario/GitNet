@@ -1,4 +1,3 @@
-from curses import resetty
 from itertools import islice
 from datetime import date, timedelta
 from graph_tool.all import *
@@ -10,9 +9,8 @@ class dataProcessing:
         pass
 
     def get_relevant_users(graph: interestGraph) -> None:
-        graph_properties: list = graph.get_graph_properties()
-        v_name: VertexPropertyMap = graph_properties[0]
-        v_is_user: VertexPropertyMap = graph_properties[1]
+        v_name: VertexPropertyMap = graph.get_name()
+        v_is_user: VertexPropertyMap = graph.get_is_user()
         sub_graph = GraphView(graph.g, v_is_user)
         
         pr = pagerank(sub_graph)
@@ -21,17 +19,16 @@ class dataProcessing:
         results.sort(key = lambda element: element[1], reverse = True)
         print("*** Most relevant users ***")
         for item in results[:10]:
-                print(item)   
+                print(item[0])   
         print("-----------------------------------------")
 
 
     def get_relevant_repos(graph: interestGraph) -> None:
-        graph_properties: list = graph.get_graph_properties()
-        v_name: VertexPropertyMap = graph_properties[0]
-        v_is_repo: VertexPropertyMap = graph_properties[2]
-        v_repo_st: VertexPropertyMap = graph_properties[3]
-        v_repo_forks: VertexPropertyMap = graph_properties[5]
-        v_repo_date: VertexPropertyMap = graph_properties[6]
+        v_name: VertexPropertyMap = graph.get_name()
+        v_is_repo: VertexPropertyMap = graph.get_is_repo()
+        v_repo_st: VertexPropertyMap = graph.get_repo_st()
+        v_repo_forks: VertexPropertyMap = graph.get_repo_forks()
+        v_repo_date: VertexPropertyMap = graph.get_repo_date()
 
         personalized_vector = graph.g.new_vertex_property("double")
 
@@ -67,15 +64,14 @@ class dataProcessing:
         results.sort(key = lambda element: element[1], reverse = True)
         print("*** Most relevant repos ***")
         for item in results[:10]:
-                print(item)   
+                print(item[0])   
         print("-----------------------------------------")
 
 
 
     def get_languages(graph) -> None:
-        graph_properties: list = graph.get_graph_properties()
-        v_repo_lang: VertexPropertyMap = graph_properties[4]
-        v_is_repo: VertexPropertyMap = graph_properties[2]
+        v_repo_lang: VertexPropertyMap = graph.get_repo_lang()
+        v_is_repo: VertexPropertyMap = graph.get_is_repo()
         sub_graph = GraphView(graph.g, v_is_repo)
 
         languages: dict = {}
