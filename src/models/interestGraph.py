@@ -19,8 +19,6 @@ class interestGraph:
 
     __MAX_REPOS_STARGAZER: int = 20
     __MAX_NUMBER_ITEMS: int = 100
-    __IS_USER: bool = True
-    __IS_REPOSITORY: bool = False
     __API_URL = "https://api.github.com/"
 
 
@@ -53,7 +51,7 @@ class interestGraph:
                 new_stargazer_vertex: Vertex = stargazer_vertex[0]
                 self.create_edge(relationship.STARRED, new_stargazer_vertex, main_vertex)
             else:
-                new_stargazer_vertex: Vertex = self.create_vertex(stargazer, self.__IS_USER)
+                new_stargazer_vertex: Vertex = self.create_stargazer_vertex(stargazer)
                 self.create_edge(relationship.STARRED, new_stargazer_vertex, main_vertex)
 
             self.add_follower_relationship(stargazer, new_stargazer_vertex, stargazers)
@@ -70,7 +68,7 @@ class interestGraph:
                 if follower_vertex:
                     self.create_edge(relationship.FOLLOWS, follower_vertex[0], new_vertex)  
                 else:
-                    follower_vertex = self.create_vertex(follower, self.__IS_USER)
+                    follower_vertex = self.create_stargazer_vertex(follower)
                     self.create_edge(relationship.FOLLOWS, follower_vertex, new_vertex)
             except:
                     pass
@@ -84,30 +82,34 @@ class interestGraph:
                 if repeated_repos[0] != main_vertex:      
                     self.create_edge(relationship.STARRED, new_vertex, repeated_repos[0])
             else:
-                starred_repo: Vertex = self.create_vertex(starred, self.__IS_REPOSITORY)
+                starred_repo: Vertex = self.create_repository_vertex(starred)
                 self.create_edge(relationship.STARRED, new_vertex, starred_repo) 
            
     def create_main_vertex(self) -> Vertex:
         main_repo_url: str = self.__API_URL+"repos/%s" % self.full_name_repository
         main_repository = self.session.get(main_repo_url , headers=self.session.headers)
-        self.create_vertex(main_repository.json() , self.__IS_REPOSITORY)
+        self.create_repository_vertex(main_repository.json())
         main_vertex: Vertex = self.g.vertex(0)
         return main_vertex
         
 
-    def create_vertex(self, vertex_info: json, type: bool) -> Vertex:
+    def create_stargazer_vertex(self, vertex_info: json) -> Vertex:
         vertex = self.g.add_vertex()
-        if type == self.__IS_USER:
-            self.__v_is_user[vertex] = True
-            self.__v_name[vertex] = vertex_info['login']
-        elif type == self.__IS_REPOSITORY:
-            self.__v_is_repo[vertex] = True 
-            self.__v_name[vertex] = vertex_info['name']
-            self.__v_repo_st[vertex] = vertex_info['stargazers_count']
-            self.__v_repo_lang[vertex] = vertex_info['language'] 
-            self.__v_repo_forks[vertex] = vertex_info['forks_count']
-            self.__v_repo_date[vertex] = vertex_info['created_at']
+        self.__v_is_user[vertex] = True
+        self.__v_name[vertex] = vertex_info['login']
         return vertex
+
+    
+    def create_repository_vertex(self, vertex_info: json) -> Vertex:
+        vertex = self.g.add_vertex()
+        self.__v_is_repo[vertex] = True 
+        self.__v_name[vertex] = vertex_info['name']
+        self.__v_repo_st[vertex] = vertex_info['stargazers_count']
+        self.__v_repo_lang[vertex] = vertex_info['language'] 
+        self.__v_repo_forks[vertex] = vertex_info['forks_count']
+        self.__v_repo_date[vertex] = vertex_info['created_at']
+        return vertex
+
 
     def create_edge(self, relation: str, actual_vertex: Vertex, main_vertex: Vertex) -> None:
         actual_edge: Edge = self.g.add_edge(actual_vertex,main_vertex)
