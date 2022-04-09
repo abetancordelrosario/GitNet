@@ -1,7 +1,7 @@
-from enum import Enum, auto
+from enum import Enum
 from graph_tool.all import *
-import requests
 import json
+from models.dataExtraction import dataExtraction
 
 class relationship(Enum):
     STARRED = "starred"
@@ -16,19 +16,24 @@ class interestGraph:
     The construtor requires two strings, first is the full repository name 
     (author/repository) and the second one is the user's GitHub token.
     """
-
-    __MAX_REPOS_STARGAZER: int = 20
-    __MAX_NUMBER_ITEMS: int = 100
-    __API_URL = "https://api.github.com/"
-
+    
+    __main_repository: json 
+    __stargazers = list = []
+    __stargazers_starred_repos: list = []
+    __stargazers_followers: list = []
 
     def __init__(self, full_name_repository: str, token: str) -> None:
         self.g = Graph(directed=True)
-        self.session = requests.Session()
-        self.session.headers['Authorization'] = 'token %s' % token
         self.full_name_repository = full_name_repository
+        self.token = token
+        self.extract_data_from_api()
         self.set_graph_properties()
         
+    def extract_data_from_api(self):
+        extract_data = dataExtraction(self.full_name_repository, self.token)
+        self.__stargazers_starred_repos, self.__stargazers_followers = extract_data.foo()
+        self.__main_repository = extract_data.get_main_repo()
+        self.__stargazers = extract_data.get_stargazers()
 
     def set_graph_properties(self) -> None:
         self.__v_name: VertexPropertyMap = self.g.new_vertex_property("string")
@@ -43,9 +48,8 @@ class interestGraph:
 
     def create_graph(self) -> None:
         main_vertex: Vertex = self.create_main_vertex()
-        
-        stargazers: list = self.request_api(None, self.__MAX_NUMBER_ITEMS, "stargazers", True)
-        for stargazer in stargazers:
+
+        for index, stargazer in enumerate(self.__stargazers):
             stargazer_vertex: list = find_vertex(self.g, self.__v_name, stargazer['login'])
             if stargazer_vertex:
                 new_stargazer_vertex: Vertex = stargazer_vertex[0]
@@ -54,12 +58,12 @@ class interestGraph:
                 new_stargazer_vertex: Vertex = self.create_stargazer_vertex(stargazer)
                 self.create_edge(relationship.STARRED, new_stargazer_vertex, main_vertex)
 
-            self.add_follower_relationship(stargazer, new_stargazer_vertex, stargazers)
-            self.add_starred_repos(stargazer, new_stargazer_vertex, main_vertex)
+            self.add_follower_relationship(stargazer, new_stargazer_vertex, self.__stargazers, index)
+            self.add_starred_repos(stargazer, new_stargazer_vertex, main_vertex, index)
 
 
-    def add_follower_relationship(self, stargazer: json, new_vertex: Vertex, stargazers: list) -> None:
-        followers: list = self.request_api(stargazer, self.__MAX_NUMBER_ITEMS, "followers", False)
+    def add_follower_relationship(self, stargazer: json, new_vertex: Vertex, stargazers: list, index: int) -> None:
+        followers: list = self.__stargazers_followers[index]
 
         for follower in followers:
             try:
@@ -73,8 +77,8 @@ class interestGraph:
             except:
                     pass
 
-    def add_starred_repos(self, stargazer: json, new_vertex: Vertex, main_vertex: Vertex):
-        starred_repos: list = self.request_api(stargazer, self.__MAX_REPOS_STARGAZER, "starred", False)
+    def add_starred_repos(self, stargazer: json, new_vertex: Vertex, main_vertex: Vertex, index: int):
+        starred_repos: list = self.__stargazers_starred_repos[index]
 
         for starred in starred_repos:
             repeated_repos: list = find_vertex(self.g, self.__v_name, starred['name'])
@@ -86,9 +90,7 @@ class interestGraph:
                 self.create_edge(relationship.STARRED, new_vertex, starred_repo) 
            
     def create_main_vertex(self) -> Vertex:
-        main_repo_url: str = self.__API_URL+"repos/%s" % self.full_name_repository
-        main_repository = self.session.get(main_repo_url , headers=self.session.headers)
-        self.create_repository_vertex(main_repository.json())
+        self.create_repository_vertex(self.__main_repository)
         main_vertex: Vertex = self.g.vertex(0)
         return main_vertex
         
@@ -115,21 +117,6 @@ class interestGraph:
         actual_edge: Edge = self.g.add_edge(actual_vertex,main_vertex)
         self.__e_relation[actual_edge] = relation
 
-
-    def request_api(self, stargazer: json, num_items: int, info: str, is_repo_url: bool) -> list:
-        if is_repo_url:
-            url: str = self.__API_URL+"repos/%s/%s?per_page=%d" % (self.full_name_repository, info, num_items)
-        else:
-            url: str = self.__API_URL+"users/%s/%s?per_page=%d" % (stargazer['login'], info, num_items)
-
-        api_response = self.session.get(url , headers=self.session.headers)
-        response_json: list = api_response.json()
-        if info != "starred":
-            while 'next' in api_response.links.keys():
-                api_response = requests.get(api_response.links['next']['url'], headers=self.session.headers)
-                response_json.extend(api_response.json())
-
-        return response_json
 
     def get_name(self) -> VertexPropertyMap:
         return self.__v_name

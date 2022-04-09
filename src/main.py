@@ -1,7 +1,5 @@
-from concurrent.futures import ProcessPoolExecutor
 from command import command
 from models.draw import draw
-from models.extractData import extractData
 from models.interestGraph import interestGraph
 from models.dataProcessing import dataProcessing  
 import time
@@ -10,15 +8,6 @@ import time
 def command_line() -> None:
     cli = command()
     cli.cli()
-
-def fetching() -> None:
-    initialTime = time.time()
-
-    # ex = extractData("marius92mc/github-stargazers","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")
-    ex = extractData("azat-co/react","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")
-    ex.foo()
-
-    print("Tiempo que tarda en ejecutar el programa:", (time.time() - initialTime), "seconds")
 
 
 def main() -> None:   
@@ -38,6 +27,5 @@ def main() -> None:
     print(graph.g.num_vertices)
 
 if __name__ == "__main__":
-    # main()
+    main()
     # command_line()
-    fetching()
