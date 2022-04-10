@@ -1,5 +1,4 @@
 from enum import Enum
-from types import NoneType
 from typing import Tuple
 import aiohttp
 import asyncio
@@ -10,7 +9,7 @@ import re
 class RateLimitExceeded(Exception):
 
     def __init__(self) -> None:
-        super().__init__("Rate limit exceed")
+        super().__init__("Rate limit exceed.")
 
 class api_data(Enum):
     STARRED = "starred"
@@ -49,11 +48,10 @@ class dataExtraction:
     async def fetch_repo_and_stargazers(self) -> Tuple[list, list]:
         async with aiohttp.ClientSession(headers=self.headers) as session:
             await self.fetch_main_repo(session)
-
             self.__stargazers = await self.request_api(None, self.__MAX_NUMBER_ITEMS, api_data.STARGAZERS.value, True, session)
+            
             starred_tasks = []
             follower_tasks = []
-
             for stargazer in self.__stargazers:
                 follow_task =  asyncio.ensure_future(self.request_api(stargazer, 
                                                                       self.__MAX_NUMBER_ITEMS, 
@@ -86,16 +84,17 @@ class dataExtraction:
                 if info != api_data.STARRED.value:
                     num_pages: int = await self.get_number_pages(api_response)
                     pages_tasks = []
-                    for _ in range(num_pages - 1):
-                        page_task = asyncio.ensure_future(self.consume_pages(session, response_json, api_response))
+                    for page in range(1, num_pages):
+                        page_task = asyncio.ensure_future(self.consume_pages(session, response_json, api_response, url, page+1))
                         pages_tasks.append(page_task)
                     await asyncio.gather(*pages_tasks)
             elif api_response.status == self.__RATE_LIMIT_STATUS_CODE:
                 raise RateLimitExceeded()
             return response_json
         
-    async def consume_pages(self, session, response_json, api_response):
-        async with session.get(api_response.links['next']['url'], headers= session.headers) as api_response:
+    async def consume_pages(self, session, response_json, api_response, url, page):
+        url = url+"&page=%d" % page 
+        async with session.get(url, headers= session.headers) as api_response:
             if api_response.status == self.__OK_STATUS_CODE:
                 response_json.extend(await api_response.json())
             elif api_response.status == self.__RATE_LIMIT_STATUS_CODE:
@@ -111,7 +110,7 @@ class dataExtraction:
                 raise RateLimitExceeded()
 
     async def get_number_pages(self, api_response: aiohttp.ClientResponse) -> int:
-        response: NoneType = api_response.headers.get('Link')
+        response = api_response.headers.get('Link')
         if response:
             links: list = str(response).split(",")
             num_pages = re.findall('\d+', links[1])
