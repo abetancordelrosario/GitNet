@@ -1,8 +1,16 @@
 from enum import Enum
+from types import NoneType
 from typing import Tuple
 import aiohttp
 import asyncio
 import json
+import re
+
+
+class RateLimitExceeded(Exception):
+
+    def __init__(self) -> None:
+        super().__init__("Rate limit exceed")
 
 class api_data(Enum):
     STARRED = "starred"
@@ -20,6 +28,11 @@ class dataExtraction:
     __MAX_REPOS_STARGAZER: int = 20
     __MAX_NUMBER_ITEMS: int = 100
     __API_URL = "https://api.github.com/"
+
+    
+    __RATE_LIMIT_STATUS_CODE: int = 403
+    __NOT_FOUND_STATUS_CODE: int = 404
+    __OK_STATUS_CODE: int = 200
 
     __stargazers: list = []
     __main_repository: json
@@ -67,19 +80,39 @@ class dataExtraction:
             url: str = self.__API_URL+"users/%s/%s?per_page=%d" % (stargazer['login'], info, num_items)
 
         async with session.get(url , headers=session.headers) as api_response:
-            response_json: list = await api_response.json()
-            if info != api_data.STARRED.value:
-                while 'next' in api_response.links.keys():
-                    async with session.get(api_response.links['next']['url'], headers= session.headers) as api_response:
-                        response_json.extend(await api_response.json())
-
+            if api_response.status == self.__OK_STATUS_CODE:
+                response_json: list = await api_response.json()
+                if info != api_data.STARRED.value:
+                    num_pages: int = await self.get_number_pages(api_response)
+ 
+                    while 'next' in api_response.links.keys():
+                        async with session.get(api_response.links['next']['url'], headers= session.headers) as api_response:
+                            if api_response.status == self.__OK_STATUS_CODE:
+                                response_json.extend(await api_response.json())
+                            elif api_response.status == self.__RATE_LIMIT_STATUS_CODE:
+                                raise RateLimitExceeded()
+            elif api_response.status == self.__RATE_LIMIT_STATUS_CODE:
+                raise RateLimitExceeded()
             return response_json
 
 
     async def fetch_main_repo(self, session):
         main_repo_url: str = self.__API_URL+"repos/%s" % self.full_name_repository
         async with session.get(main_repo_url, headers= session.headers) as main_repo_response:
-            self.__main_repository = await main_repo_response.json()
+            if main_repo_response.status == self.__OK_STATUS_CODE:
+                self.__main_repository = await main_repo_response.json()
+            elif main_repo_response.status == self.__RATE_LIMIT_STATUS_CODE:
+                raise RateLimitExceeded()
+
+    async def get_number_pages(self, api_response: aiohttp.ClientResponse) -> int:
+        response: NoneType = api_response.headers.get('Link')
+        if response:
+            links: list = str(response).split(",")
+            num_pages = re.findall('\d+', links[1])
+            return num_pages[2]
+        else:
+            return 0
+        
 
     def get_stargazers(self):
         return self.__stargazers
