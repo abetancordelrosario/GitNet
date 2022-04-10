@@ -1,13 +1,12 @@
-from typing import Tuple
 import aiohttp
-import asyncio             
+import asyncio
 import json
 
 class dataExtraction:
     '''
     Fetch information from the GitHub API and save it into lists.
 
-    The construtor requires two strings, first is the full repository name 
+    The construtor requires two strings, first is the full repository name
     (author/repository) and the second one is the user's GitHub token.
     '''
 
@@ -20,7 +19,7 @@ class dataExtraction:
 
     def __init__(self, full_name_repository: str, token: str) -> None:
         self.full_name_repository = full_name_repository
-        self.token = token 
+        self.token = token
 
     def fetch_data(self) -> Tuple[list,list]:
         stargazers_followers_list, stargazer_starred_repos_list = asyncio.run(self.fetch_repo_and_stargazers())
@@ -60,10 +59,10 @@ class dataExtraction:
                 while 'next' in api_response.links.keys():
                     async with session.get(api_response.links['next']['url'], headers= session.headers) as api_response:
                         response_json.extend(await api_response.json())
-                        
+
             return response_json
 
-    
+
     def get_stargazers(self):
         return self.__stargazers
 
