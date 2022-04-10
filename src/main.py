@@ -1,4 +1,5 @@
 from command import command
+from models.dataExtraction import dataExtraction
 from models.draw import draw
 from models.interestGraph import interestGraph
 from models.dataProcessing import dataProcessing  
@@ -14,7 +15,11 @@ def main() -> None:
 
     initialTime = time.time()
 
-    graph = interestGraph("marius92mc/github-stargazers","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")
+    extract = dataExtraction("marius92mc/github-stargazers","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")
+    # extract = dataExtraction("ternaus/TernausNet","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")
+    graph = interestGraph(extract)
+   
+
 
     graph.create_graph()
     

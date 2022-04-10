@@ -22,18 +22,16 @@ class interestGraph:
     __stargazers_starred_repos: list = []
     __stargazers_followers: list = []
 
-    def __init__(self, full_name_repository: str, token: str) -> None:
+    def __init__(self, extract_data: dataExtraction) -> None:
         self.g = Graph(directed=True)
-        self.full_name_repository = full_name_repository
-        self.token = token
+        self.extract_data = extract_data
         self.extract_data_from_api()
         self.set_graph_properties()
         
     def extract_data_from_api(self):
-        extract_data = dataExtraction(self.full_name_repository, self.token)
-        self.__stargazers_starred_repos, self.__stargazers_followers = extract_data.foo()
-        self.__main_repository = extract_data.get_main_repo()
-        self.__stargazers = extract_data.get_stargazers()
+        self.__stargazers_starred_repos, self.__stargazers_followers = self.extract_data.foo()
+        self.__main_repository = self.extract_data.get_main_repo()
+        self.__stargazers = self.extract_data.get_stargazers()
 
     def set_graph_properties(self) -> None:
         self.__v_name: VertexPropertyMap = self.g.new_vertex_property("string")
@@ -83,7 +81,7 @@ class interestGraph:
         for starred in starred_repos:
             repeated_repos: list = find_vertex(self.g, self.__v_name, starred['name'])
             if repeated_repos:
-                if repeated_repos[0] != main_vertex:      
+                if repeated_repos[0] != main_vertex:
                     self.create_edge(relationship.STARRED, new_vertex, repeated_repos[0])
             else:
                 starred_repo: Vertex = self.create_repository_vertex(starred)

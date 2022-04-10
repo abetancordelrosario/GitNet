@@ -5,9 +5,6 @@ from models import interestGraph
 
 class dataProcessing:
 
-    def __init__(self) -> None:
-        pass
-
     def get_relevant_users(graph: interestGraph) -> None:
         v_name: VertexPropertyMap = graph.get_name()
         v_is_user: VertexPropertyMap = graph.get_is_user()

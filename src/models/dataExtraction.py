@@ -31,7 +31,7 @@ class dataExtraction:
             self.__stargazers = await self.foo3(None, self.__MAX_NUMBER_ITEMS, "stargazers", True, session)
             starred_tasks = []
             follower_tasks = []
-            
+
             for stargazer in self.__stargazers:
                 follow_relationship_task =  asyncio.ensure_future(self.foo3(stargazer, self.__MAX_NUMBER_ITEMS, "followers", False, session))
                 follower_tasks.append(follow_relationship_task)
