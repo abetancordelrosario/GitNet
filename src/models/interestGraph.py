@@ -28,7 +28,7 @@ class interestGraph:
         self.set_graph_properties()
 
     def extract_data_from_api(self):
-        self.__stargazers_starred_repos, self.__stargazers_followers = self.extract_data.foo()
+        self.__stargazers_starred_repos, self.__stargazers_followers = self.extract_data.fetch_data()
         self.__main_repository = self.extract_data.get_main_repo()
         self.__stargazers = self.extract_data.get_stargazers()
 
@@ -50,16 +50,16 @@ class interestGraph:
             stargazer_vertex: list = find_vertex(self.g, self.__v_name, stargazer['login'])
             if stargazer_vertex:
                 new_stargazer_vertex: Vertex = stargazer_vertex[0]
-                self.create_edge(relationship.STARRED, new_stargazer_vertex, main_vertex)
+                self.create_edge(relationship.STARRED.value, new_stargazer_vertex, main_vertex)
             else:
                 new_stargazer_vertex: Vertex = self.create_stargazer_vertex(stargazer)
-                self.create_edge(relationship.STARRED, new_stargazer_vertex, main_vertex)
+                self.create_edge(relationship.STARRED.value, new_stargazer_vertex, main_vertex)
 
-            self.add_follower_relationship(stargazer, new_stargazer_vertex, self.__stargazers, index)
-            self.add_starred_repos(stargazer, new_stargazer_vertex, main_vertex, index)
+            self.add_follower_relationship(new_stargazer_vertex, self.__stargazers, index)
+            self.add_starred_repos(new_stargazer_vertex, main_vertex, index)
 
 
-    def add_follower_relationship(self, stargazer: json, new_vertex: Vertex, stargazers: list, index: int) -> None:
+    def add_follower_relationship(self, new_vertex: Vertex, stargazers: list, index: int) -> None:
         followers: list = self.__stargazers_followers[index]
 
         for follower in followers:
@@ -67,29 +67,25 @@ class interestGraph:
                 stargazers.index(follower)
                 follower_vertex: list = find_vertex(self.g, self.__v_name, follower['login'])
                 if follower_vertex:
-                    self.create_edge(relationship.FOLLOWS, follower_vertex[0], new_vertex)
+                    self.create_edge(relationship.FOLLOWS.value, follower_vertex[0], new_vertex)
                 else:
                     follower_vertex = self.create_stargazer_vertex(follower)
-                    self.create_edge(relationship.FOLLOWS, follower_vertex, new_vertex)
+                    self.create_edge(relationship.FOLLOWS.value, follower_vertex, new_vertex)
             except:
                     pass
 
 
-    def add_starred_repos(self, stargazer: json, new_vertex: Vertex, main_vertex: Vertex, index: int):
+    def add_starred_repos(self, new_vertex: Vertex, main_vertex: Vertex, index: int):
         starred_repos: list = self.__stargazers_starred_repos[index]
-
-    def add_starred_repos(self, stargazer: json, new_vertex: Vertex, main_vertex: Vertex, index: int):
-        starred_repos: list = self.__stargazers_starred_repos[index]
-
 
         for starred in starred_repos:
             repeated_repos: list = find_vertex(self.g, self.__v_name, starred['name'])
             if repeated_repos:
                 if repeated_repos[0] != main_vertex:
-                    self.create_edge(relationship.STARRED, new_vertex, repeated_repos[0])
+                    self.create_edge(relationship.STARRED.value, new_vertex, repeated_repos[0])
             else:
                 starred_repo: Vertex = self.create_repository_vertex(starred)
-                self.create_edge(relationship.STARRED, new_vertex, starred_repo)
+                self.create_edge(relationship.STARRED.value, new_vertex, starred_repo)
 
     def create_main_vertex(self) -> Vertex:
         self.create_repository_vertex(self.__main_repository)
