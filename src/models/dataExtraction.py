@@ -46,26 +46,26 @@ class dataExtraction:
         return stargazers_followers_list, stargazer_starred_repos_list
 
 
-    async def fetch_repo_and_stargazers(self):
+    async def fetch_repo_and_stargazers(self) -> Tuple[list, list]:
         async with aiohttp.ClientSession(headers=self.headers) as session:
             await self.fetch_main_repo(session)
 
-            self.__stargazers = await self.fetch_paginated_lists(None, self.__MAX_NUMBER_ITEMS, api_data.STARGAZERS.value, True, session)
+            self.__stargazers = await self.request_api(None, self.__MAX_NUMBER_ITEMS, api_data.STARGAZERS.value, True, session)
             starred_tasks = []
             follower_tasks = []
 
             for stargazer in self.__stargazers:
-                follow_task =  asyncio.ensure_future(self.fetch_paginated_lists(stargazer, 
-                                                                                self.__MAX_NUMBER_ITEMS, 
-                                                                                api_data.FOLLOWERS.value, 
-                                                                                False, 
-                                                                                session))
+                follow_task =  asyncio.ensure_future(self.request_api(stargazer, 
+                                                                      self.__MAX_NUMBER_ITEMS, 
+                                                                      api_data.FOLLOWERS.value, 
+                                                                      False, 
+                                                                      session))
                 follower_tasks.append(follow_task)
-                starred_task = asyncio.ensure_future(self.fetch_paginated_lists(stargazer, 
-                                                                                self.__MAX_REPOS_STARGAZER, 
-                                                                                api_data.STARRED.value, 
-                                                                                False, 
-                                                                                session))
+                starred_task = asyncio.ensure_future(self.request_api(stargazer, 
+                                                                      self.__MAX_REPOS_STARGAZER, 
+                                                                      api_data.STARRED.value, 
+                                                                      False, 
+                                                                      session))
                 starred_tasks.append(starred_task)
             starred_results = await asyncio.gather(*starred_tasks)
             follower_results = await asyncio.gather(*follower_tasks)
@@ -73,11 +73,12 @@ class dataExtraction:
             return starred_results, follower_results
 
 
-    async def fetch_paginated_lists(self, stargazer: json, num_items: int, info: str, is_repo_url: bool, session) -> list:
+    async def request_api(self, stargazer: json, num_items: int, info: str, is_repo_url: bool, session) -> list:
         if is_repo_url:
             url: str = self.__API_URL+"repos/%s/%s?per_page=%d" % (self.full_name_repository, info, num_items)
         else:
             url: str = self.__API_URL+"users/%s/%s?per_page=%d" % (stargazer['login'], info, num_items)
+
 
         async with session.get(url , headers=session.headers) as api_response:
             if api_response.status == self.__OK_STATUS_CODE:
@@ -89,7 +90,6 @@ class dataExtraction:
                         page_task = asyncio.ensure_future(self.consume_pages(session, response_json, api_response))
                         pages_tasks.append(page_task)
                     await asyncio.gather(*pages_tasks)
-
             elif api_response.status == self.__RATE_LIMIT_STATUS_CODE:
                 raise RateLimitExceeded()
             return response_json
