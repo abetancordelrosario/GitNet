@@ -13,8 +13,7 @@ class interestGraph:
     of this repository, the relationships between them and the starred repositories 
     of each stargazer.
 
-    The construtor requires two strings, first is the full repository name 
-    (author/repository) and the second one is the user's GitHub token.
+    The constructor requires a dataExtraction object.
     """
 
     __MAX_REPOS_STARGAZER: int = 20
@@ -29,6 +28,13 @@ class interestGraph:
         self.full_name_repository = full_name_repository
         self.set_graph_properties()
         
+<<<<<<< Updated upstream
+=======
+    def extract_data_from_api(self):
+        self.__stargazers_starred_repos, self.__stargazers_followers = self.extract_data.fetch_data()
+        self.__main_repository = self.extract_data.get_main_repo()
+        self.__stargazers = self.extract_data.get_stargazers()
+>>>>>>> Stashed changes
 
     def set_graph_properties(self) -> None:
         self.__v_name: VertexPropertyMap = self.g.new_vertex_property("string")
@@ -73,8 +79,14 @@ class interestGraph:
             except:
                     pass
 
+<<<<<<< Updated upstream
     def add_starred_repos(self, stargazer: json, new_vertex: Vertex, main_vertex: Vertex):
         starred_repos: list = self.request_api(stargazer, self.__MAX_REPOS_STARGAZER, "starred", False)
+=======
+
+    def add_starred_repos(self, stargazer: json, new_vertex: Vertex, main_vertex: Vertex, index: int):
+        starred_repos: list = self.__stargazers_starred_repos[index]
+>>>>>>> Stashed changes
 
         for starred in starred_repos:
             repeated_repos: list = find_vertex(self.g, self.__v_name, starred['name'])
