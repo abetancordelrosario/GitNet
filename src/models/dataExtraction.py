@@ -84,16 +84,22 @@ class dataExtraction:
                 response_json: list = await api_response.json()
                 if info != api_data.STARRED.value:
                     num_pages: int = await self.get_number_pages(api_response)
- 
-                    while 'next' in api_response.links.keys():
-                        async with session.get(api_response.links['next']['url'], headers= session.headers) as api_response:
-                            if api_response.status == self.__OK_STATUS_CODE:
-                                response_json.extend(await api_response.json())
-                            elif api_response.status == self.__RATE_LIMIT_STATUS_CODE:
-                                raise RateLimitExceeded()
+                    pages_tasks = []
+                    for _ in range(num_pages - 1):
+                        page_task = asyncio.ensure_future(self.consume_pages(session, response_json, api_response))
+                        pages_tasks.append(page_task)
+                    await asyncio.gather(*pages_tasks)
+
             elif api_response.status == self.__RATE_LIMIT_STATUS_CODE:
                 raise RateLimitExceeded()
             return response_json
+        
+    async def consume_pages(self, session, response_json, api_response):
+        async with session.get(api_response.links['next']['url'], headers= session.headers) as api_response:
+            if api_response.status == self.__OK_STATUS_CODE:
+                response_json.extend(await api_response.json())
+            elif api_response.status == self.__RATE_LIMIT_STATUS_CODE:
+                raise RateLimitExceeded()
 
 
     async def fetch_main_repo(self, session):
@@ -109,7 +115,7 @@ class dataExtraction:
         if response:
             links: list = str(response).split(",")
             num_pages = re.findall('\d+', links[1])
-            return num_pages[2]
+            return int(num_pages[2])
         else:
             return 0
         
