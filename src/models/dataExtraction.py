@@ -77,7 +77,6 @@ class dataExtraction:
         else:
             url: str = self.__API_URL+"users/%s/%s?per_page=%d" % (stargazer['login'], info, num_items)
 
-
         async with session.get(url , headers=session.headers) as api_response:
             if api_response.status == self.__OK_STATUS_CODE:
                 response_json: list = await api_response.json()
@@ -90,6 +89,7 @@ class dataExtraction:
                     await asyncio.gather(*pages_tasks)
             elif api_response.status == self.__RATE_LIMIT_STATUS_CODE:
                 raise RateLimitExceeded()
+
             return response_json
         
     async def consume_pages(self, session, response_json, api_response, url, page):
@@ -111,12 +111,13 @@ class dataExtraction:
 
     async def get_number_pages(self, api_response: aiohttp.ClientResponse) -> int:
         response = api_response.headers.get('Link')
+        no_pages: int = 0
         if response:
             links: list = str(response).split(",")
             num_pages = re.findall('\d+', links[1])
             return int(num_pages[2])
         else:
-            return 0
+            return no_pages
         
 
     def get_stargazers(self):
