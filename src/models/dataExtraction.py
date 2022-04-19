@@ -26,6 +26,7 @@ class dataExtraction:
 
     __MAX_REPOS_STARGAZER: int = 20
     __MAX_NUMBER_ITEMS: int = 100
+    __NO_PAGES: int = 0
     __API_URL = "https://api.github.com/"
 
     
@@ -111,13 +112,12 @@ class dataExtraction:
 
     async def get_number_pages(self, api_response: aiohttp.ClientResponse) -> int:
         response = api_response.headers.get('Link')
-        no_pages: int = 0
         if response:
             links: list = str(response).split(",")
             num_pages = re.findall('\d+', links[1])
             return int(num_pages[2])
         else:
-            return no_pages
+            return self.__NO_PAGES
         
 
     def get_stargazers(self):

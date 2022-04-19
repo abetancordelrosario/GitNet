@@ -41,6 +41,8 @@ class interestGraph:
         self.__v_repo_date: VertexPropertyMap = self.g.new_vertex_property("string")
         self.__v_repo_lang: VertexPropertyMap = self.g.new_vertex_property("string")
         self.__e_relation: EdgePropertyMap = self.g.new_edge_property("string")
+        self.__v_repo_topics: VertexPropertyMap = self.g.new_vertex_property("vector<string>")
+        self.__v_repo_license: VertexPropertyMap = self.g.new_vertex_property("string")
 
 
     def create_graph(self) -> None:
@@ -108,6 +110,9 @@ class interestGraph:
         self.__v_repo_lang[vertex] = vertex_info['language']
         self.__v_repo_forks[vertex] = vertex_info['forks_count']
         self.__v_repo_date[vertex] = vertex_info['created_at']
+        self.__v_repo_topics[vertex] = vertex_info['topics']
+        if vertex_info['license']:
+            self.__v_repo_license[vertex] = vertex_info['license']['name']
         return vertex
 
 
@@ -136,3 +141,9 @@ class interestGraph:
 
     def get_repo_date(self) -> VertexPropertyMap:
         return self.__v_repo_date
+
+    def get_repo_topics(self) -> VertexPropertyMap:
+        return self.__v_repo_topics           
+
+    def get_repo_license(self) -> VertexPropertyMap:
+        return self.__v_repo_license                     

@@ -19,14 +19,14 @@ def main() -> None:
     # extract = dataExtraction("ternaus/TernausNet","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")
     # extract = dataExtraction("azat-co/react","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")
     graph = interestGraph(extract)
-   
-
-
     graph.create_graph()
-    
-    dataProcessing.get_relevant_users(graph)
-    dataProcessing.get_relevant_repos(graph)
-    dataProcessing.get_languages(graph)
+
+    dp = dataProcessing(graph)    
+    dp.get_relevant_users()
+    dp.get_relevant_repos()
+    dp.get_languages()
+    dp.get_topics()
+    dp.get_licenses()
     # draw.draw_graph(graph)
 
     print("Tiempo que tarda en ejecutar el programa:", (time.time() - initialTime), "seconds")
