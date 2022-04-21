@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 import time
 from typing import Tuple
@@ -120,11 +120,10 @@ class dataExtraction:
             return self.__NO_PAGES
 
     async def stop_execution(self, api_response: aiohttp.ClientResponse):
-        print(await api_response.json())
         utc_reset_time = datetime.fromtimestamp(int(api_response.headers['X-RateLimit-Reset']))
-        sleep_time: float = (utc_reset_time - datetime.utcnow()).total_seconds()
+        sleep_time: float = (utc_reset_time - datetime.utcnow() + timedelta(0, 5)).total_seconds()
         print(sleep_time)
-        time.sleep(sleep_time)
+        await asyncio.sleep(sleep_time)
         
 
     def get_stargazers(self):
