@@ -1,15 +1,12 @@
+from datetime import datetime
 from enum import Enum
+import time
 from typing import Tuple
 import aiohttp
 import asyncio
 import json
 import re
 
-
-class RateLimitExceeded(Exception):
-
-    def __init__(self) -> None:
-        super().__init__("Rate limit exceed.")
 
 class api_data(Enum):
     STARRED = "starred"
@@ -18,7 +15,8 @@ class api_data(Enum):
 
 class dataExtraction:
     '''
-    Fetch information from the GitHub API and save it into lists.
+    Fetch information from the GitHub API and save it into lists concurrently 
+    using asynchronous programming.
 
     The construtor requires two strings, first is the full repository name
     (author/repository) and the second one is the user's GitHub token.
@@ -47,7 +45,8 @@ class dataExtraction:
 
 
     async def fetch_repo_and_stargazers(self) -> Tuple[list, list]:
-        async with aiohttp.ClientSession(headers=self.headers) as session:
+        session_timeout = aiohttp.ClientTimeout(total=None)
+        async with aiohttp.ClientSession(headers=self.headers, timeout=session_timeout) as session:
             await self.fetch_main_repo(session)
             self.__stargazers = await self.request_api(None, self.__MAX_NUMBER_ITEMS, api_data.STARGAZERS.value, True, session)
             
@@ -77,7 +76,7 @@ class dataExtraction:
             url: str = self.__API_URL+"repos/%s/%s?per_page=%d" % (self.full_name_repository, info, num_items)
         else:
             url: str = self.__API_URL+"users/%s/%s?per_page=%d" % (stargazer['login'], info, num_items)
-
+        
         async with session.get(url , headers=session.headers) as api_response:
             if api_response.status == self.__OK_STATUS_CODE:
                 response_json: list = await api_response.json()
@@ -89,7 +88,7 @@ class dataExtraction:
                         pages_tasks.append(page_task)
                     await asyncio.gather(*pages_tasks)
             elif api_response.status == self.__RATE_LIMIT_STATUS_CODE:
-                raise RateLimitExceeded()
+                await self.stop_execution(api_response)
 
             return response_json
         
@@ -99,7 +98,7 @@ class dataExtraction:
             if api_response.status == self.__OK_STATUS_CODE:
                 response_json.extend(await api_response.json())
             elif api_response.status == self.__RATE_LIMIT_STATUS_CODE:
-                raise RateLimitExceeded()
+                await self.stop_execution(api_response)
 
 
     async def fetch_main_repo(self, session):
@@ -108,7 +107,8 @@ class dataExtraction:
             if main_repo_response.status == self.__OK_STATUS_CODE:
                 self.__main_repository = await main_repo_response.json()
             elif main_repo_response.status == self.__RATE_LIMIT_STATUS_CODE:
-                raise RateLimitExceeded()
+                await self.stop_execution(main_repo_response)
+                    
 
     async def get_number_pages(self, api_response: aiohttp.ClientResponse) -> int:
         response = api_response.headers.get('Link')
@@ -118,6 +118,13 @@ class dataExtraction:
             return int(num_pages[2])
         else:
             return self.__NO_PAGES
+
+    async def stop_execution(self, api_response: aiohttp.ClientResponse):
+        print(await api_response.json())
+        utc_reset_time = datetime.fromtimestamp(int(api_response.headers['X-RateLimit-Reset']))
+        sleep_time: float = (utc_reset_time - datetime.utcnow()).total_seconds()
+        print(sleep_time)
+        time.sleep(sleep_time)
         
 
     def get_stargazers(self):
