@@ -2,6 +2,8 @@ from itertools import islice
 from datetime import date, timedelta
 from graph_tool.all import *
 from models import interestGraph
+from models.dataVisualization import dataVisualization as dv
+
 
 class dataProcessing:
 
@@ -19,7 +21,7 @@ class dataProcessing:
         results.sort(key = lambda element: element[1], reverse = True)
         print("*** Most relevant users ***")
         for item in results[:10]:
-                print(item[0])   
+                print(item[0], item[1])   
         print("-----------------------------------------")
 
 
@@ -34,11 +36,11 @@ class dataProcessing:
 
         # Repositories with more than 1000 stargazers
         starg = v_repo_st.a >= 1000  
-        personalized_vector.a[starg] += 1
+        personalized_vector.a[starg] += 0.1
 
         # Repositories with more than 100 forks
         forks = v_repo_forks.a >= 100 
-        personalized_vector.a[forks] += 1
+        personalized_vector.a[forks] += 0.1
 
         # Repositories that have been created during the last year.
         yearago = date.today() - timedelta(365)
@@ -49,7 +51,7 @@ class dataProcessing:
             if year:
                 dateobj = date(int(year), int(month), int(day))
                 res = yearago - dateobj   
-            if res.days > 0: personalized_vector[item] += 1 
+            if res.days > 0: personalized_vector[item] += 0.1
 
         # Personalized pagerank
         pr = pagerank(self.graph.g, pers=personalized_vector)
@@ -62,7 +64,9 @@ class dataProcessing:
         results.sort(key = lambda element: element[1], reverse = True)
         print("*** Most relevant repos ***")
         for item in results[:10]:
-                print(item[0])   
+            print(item[0], item[1])
+        print("-----------------------------------------")
+           
 
     def get_topics(self) -> None:
         v_repo_topics: VertexPropertyMap = self.graph.get_repo_topics()
@@ -80,6 +84,8 @@ class dataProcessing:
         topi = dict(sorted(topics.items(), key=lambda item: item[1], reverse = True))    
         print("*** Topics ***")
         self.print_map(topi)
+        print("-----------------------------------------")
+
         
         
     def get_languages(self) -> None:
@@ -94,9 +100,13 @@ class dataProcessing:
             elif v_repo_lang[repo] != 'None': 
                 languages[v_repo_lang[repo]] = 1
         
-        lang = dict(sorted(languages.items(), key=lambda item: item[1], reverse = True))    
+        lang = dict(sorted(languages.items(), key=lambda item: item[1], reverse = True))
+        dv.plot_barChart(lang)
+
         print("*** Languages ***")
         self.print_map(lang)
+        print("-----------------------------------------")
+
 
     def get_licenses(self) -> None:
         v_repo_license = self.graph.get_repo_license()
@@ -113,11 +123,13 @@ class dataProcessing:
         lis = dict(sorted(licenses.items(), key=lambda item: item[1], reverse = True))    
         print("*** Licenses ***")
         self.print_map(lis)
+        print("-----------------------------------------")
+
 
     def print_map(self, topi):
         for key,value in islice(topi.items(), 0, 10):
             print(key, ':', value)
-
+    
 
            
     
