@@ -3,3 +3,6 @@ __pycache__
 
 #Docker
 .devcontainer
+
+#VisualCode Studio
+.vscode
