@@ -34,7 +34,7 @@ class Command:
                     method()
                     print("-----------------------------------------")
                 else:
-                    print("""Bad argument. Write 'help' to see valid arguments.""")
+                    print("""Invalid argument. Write 'help' to see valid arguments.""")
             except KeyboardInterrupt:
                 continue
             except EOFError:
