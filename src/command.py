@@ -1,6 +1,5 @@
-import click
 import argparse
-from prompt_toolkit import PromptSession, validation
+from prompt_toolkit import PromptSession
 
 from models.dataExtraction import dataExtraction
 from models.draw import draw
@@ -9,7 +8,8 @@ from models.dataProcessing import dataProcessing
 
 class Command:
 
-    # __OPTIONS = {'user': }
+    __OPTIONS = {'user': 'get_relevant_users', 'repo': 'get_relevant_repos', 'lang': 'get_languages', 'licen': 'get_licenses',
+                'topics': 'get_topics', 'draw': 'draw', "help": 'show_help'}
 
     def start_cli(self):
         parser = argparse.ArgumentParser(description="GitNet")
@@ -28,18 +28,11 @@ class Command:
         while True:
             try:
                 text = session.prompt('> ')
-                if text == "user":
-                    self.dp.get_relevant_users()
-                elif text == "repos":
-                    self.dp.get_relevant_repos()
-                elif text == "licenses":
-                    self.dp.get_licenses()
-                elif text == "lang":
-                    self.dp.get_languages()
-                elif text == "topics":
-                    self.dp.get_topics()
-                elif text == "draw":
-                    draw.draw_graph(self.graph)
+                if text in self.__OPTIONS:
+                    method = getattr(self, self.__OPTIONS[text])
+                    method()
+                else:
+                    print("""Bad argument. Write 'help' to see valid arguments.""")
             except KeyboardInterrupt:
                 continue
             except EOFError:
@@ -64,4 +57,22 @@ class Command:
         
     def draw(self):
         draw.draw_graph(self.graph)
-    
+            
+    def show_help(self):
+        print("""
+        user   --> Get most important users with PageRak algorithm.
+        
+        repo   --> Get most important repositories with personalized PageRank algorithm. 
+                   The personalization vector benefir repos with more than 1000 stargazers,
+                   more than 100 forks and those that have been created in the last year.
+                
+        lang   --> Get the programming language of other repositories that the stargazers
+                    stars.
+
+        topics --> Get the programming topics of other repositories that the stargazers
+                   stars. 
+
+        licen  --> Get the licenses language of other repositories that the stargazers
+                    stars.
+        
+        """)
