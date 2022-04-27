@@ -38,7 +38,7 @@ class dataVisualization:
          color ='grey', ha ='right', va ='bottom',
          alpha = 0.7)    
         
-        plt.savefig("plot.png", bbox_inches="tight")
+        plt.savefig("img/plot.png", bbox_inches="tight")
 
 
     

@@ -1,4 +1,4 @@
-from command import command
+from command import Command
 from models.dataExtraction import dataExtraction
 from models.draw import draw
 from models.interestGraph import interestGraph
@@ -7,10 +7,9 @@ import time
 
 
 
-def command_line() -> None:
-    cli = command()
-    cli.cli()
-
+def cli() -> None:
+    c = Command()
+    c.start_cli()
 
 def main() -> None:   
 
@@ -36,5 +35,5 @@ def main() -> None:
     print(graph.g.num_vertices)
 
 if __name__ == "__main__":
-    main()
-    # command_line()
+    # main()
+    cli()
