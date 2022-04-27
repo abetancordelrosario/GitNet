@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 
 class dataVisualization:
 
-    def plot_barChart(data: dict):
+    def plot_barChart(data: dict, title: str):
         fig, ax = plt.subplots(figsize=(12,6))
 
+        data = dict(data)
         xaxis_list: list = list(data.values())
         yaxis_list: list = list(data.keys())
         ax.barh(yaxis_list, xaxis_list)
@@ -31,7 +32,7 @@ class dataVisualization:
              fontsize = 10, fontweight ='bold',
              color ='grey')
 
-        ax.set_title('Popular programming languages',
+        ax.set_title(title,
              loc ='left', )
 
         fig.text(0.9, 0.15, 'GitNet', fontsize = 12,

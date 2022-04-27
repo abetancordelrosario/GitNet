@@ -1,6 +1,7 @@
 from itertools import islice
 from datetime import date, timedelta
 from graph_tool.all import *
+
 from models import interestGraph
 from models.dataVisualization import dataVisualization as dv
 
@@ -10,22 +11,23 @@ class dataProcessing:
     def __init__(self, graph: interestGraph) -> None:
         self.graph = graph
 
-    def get_relevant_users(self) -> None:
+    def get_relevant_users(self) -> list:
         v_name: VertexPropertyMap = self.graph.get_name()
         v_is_user: VertexPropertyMap = self.graph.get_is_user()
         sub_graph = GraphView(self.graph.g, v_is_user)
         
         pr = pagerank(sub_graph)
-        results: list = [(v_name[item], pr[item]) for item in sub_graph.vertices()]
+        users: dict = {}
+        for item in sub_graph.vertices():
+            users[v_name[item]] = pr[item]
  
-        results.sort(key = lambda element: element[1], reverse = True)
+        ordered_users = dict(sorted(users.items(), key=lambda item: item[1], reverse = True))
         print("*** Most relevant users ***")
-        for item in results[:10]:
-                print(item[0], item[1])   
-        print("-----------------------------------------")
+        self.print_map(ordered_users)
+        return list(ordered_users.items())[:10]
+       
 
-
-    def get_relevant_repos(self) -> None:
+    def get_relevant_repos(self) -> list:
         v_name: VertexPropertyMap = self.graph.get_name()
         v_is_repo: VertexPropertyMap = self.graph.get_is_repo()
         v_repo_st: VertexPropertyMap = self.graph.get_repo_st()
@@ -56,19 +58,18 @@ class dataProcessing:
         # Personalized pagerank
         pr = pagerank(self.graph.g, pers=personalized_vector)
 
-        results: list = [] 
+        repos: dict = {} 
         for item in self.graph.g.iter_vertices():
             if v_is_repo[item] == 1:
-                results.append((v_name[item], pr[item]))
+                repos[v_name[item]] = pr[item]
         
-        results.sort(key = lambda element: element[1], reverse = True)
+        ordered_repos = dict(sorted(repos.items(), key=lambda item: item[1], reverse = True))
         print("*** Most relevant repos ***")
-        for item in results[:10]:
-            print(item[0], item[1])
-        print("-----------------------------------------")
+        self.print_map(ordered_repos)
+        return list(ordered_repos.items())[:10]
            
 
-    def get_topics(self) -> None:
+    def get_topics(self) -> dict:
         v_repo_topics: VertexPropertyMap = self.graph.get_repo_topics()
         v_is_repo: VertexPropertyMap = self.graph.get_is_repo()
         sub_graph = GraphView(self.graph.g, v_is_repo)
@@ -81,14 +82,12 @@ class dataProcessing:
                 elif topic != 'None': 
                     topics[topic] = 1
 
-        topi = dict(sorted(topics.items(), key=lambda item: item[1], reverse = True))    
+        ordered_topics = dict(sorted(topics.items(), key=lambda item: item[1], reverse = True))    
         print("*** Topics ***")
-        self.print_map(topi)
-        print("-----------------------------------------")
-
+        self.print_map(ordered_topics)
+        return list(ordered_topics.items())[:10]
         
-        
-    def get_languages(self) -> None:
+    def get_languages(self) -> dict:
         v_repo_lang: VertexPropertyMap = self.graph.get_repo_lang()
         v_is_repo: VertexPropertyMap = self.graph.get_is_repo()
         sub_graph = GraphView(self.graph.g, v_is_repo)
@@ -100,15 +99,13 @@ class dataProcessing:
             elif v_repo_lang[repo] != 'None': 
                 languages[v_repo_lang[repo]] = 1
         
-        lang = dict(sorted(languages.items(), key=lambda item: item[1], reverse = True))
-        # dv.plot_barChart(lang)
-
+        ordererd_languages = dict(sorted(languages.items(), key=lambda item: item[1], reverse = True))
         print("*** Languages ***")
-        self.print_map(lang)
-        print("-----------------------------------------")
+        self.print_map(ordererd_languages)
+        return list(ordererd_languages.items())[:10]
 
 
-    def get_licenses(self) -> None:
+    def get_licenses(self) -> dict:
         v_repo_license = self.graph.get_repo_license()
         v_is_repo: VertexPropertyMap = self.graph.get_is_repo()
         sub_graph = GraphView(self.graph.g, v_is_repo)
@@ -120,11 +117,10 @@ class dataProcessing:
             elif v_repo_license[repo] and  v_repo_license[repo] != "Other": 
                 licenses[v_repo_license[repo]] = 1
 
-        lis = dict(sorted(licenses.items(), key=lambda item: item[1], reverse = True))    
+        ordered_licenses = dict(sorted(licenses.items(), key=lambda item: item[1], reverse = True))    
         print("*** Licenses ***")
-        self.print_map(lis)
-        print("-----------------------------------------")
-
+        self.print_map(ordered_licenses)
+        return list(ordered_licenses.items())[:10]
 
     def print_map(self, topi):
         for key,value in islice(topi.items(), 0, 10):

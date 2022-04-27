@@ -5,13 +5,14 @@ from models.dataExtraction import dataExtraction
 from models.draw import draw
 from models.interestGraph import interestGraph
 from models.dataProcessing import dataProcessing
+from models.dataVisualization import dataVisualization as dv
 
 class Command:
 
     __OPTIONS = {'user': 'get_relevant_users', 'repo': 'get_relevant_repos', 'lang': 'get_languages', 'licen': 'get_licenses',
                 'topics': 'get_topics', 'draw': 'draw', "help": 'show_help'}
 
-    def start_cli(self):
+    def start_cli(self) -> None:
         parser = argparse.ArgumentParser(description="GitNet")
         parser.add_argument("-r", "--repository", required=True, help="Enter full name of the repository (author/repo)")
         parser.add_argument("-t", "--token", required=True, help="Enter OAuth GitHub token")
@@ -31,6 +32,7 @@ class Command:
                 if text in self.__OPTIONS:
                     method = getattr(self, self.__OPTIONS[text])
                     method()
+                    print("-----------------------------------------")
                 else:
                     print("""Bad argument. Write 'help' to see valid arguments.""")
             except KeyboardInterrupt:
@@ -41,19 +43,24 @@ class Command:
         print('GoodBye!')
 
     def get_relevant_users(self):
-        self.dp.get_relevant_users()
+        result_data = self.dp.get_relevant_users()
+        dv.plot_barChart(result_data, "Most relevant users")
     
     def get_relevant_repos(self):
-        self.dp.get_relevant_repos()
+        result_data = self.dp.get_relevant_repos()
+        dv.plot_barChart(result_data, "Most relevant repositories")
     
     def get_languages(self):
-        self.dp.get_relevant_repos()
+        result_data = self.dp.get_languages()
+        dv.plot_barChart(result_data, "Popular programming languages")
         
     def get_topics(self):
-        self.dp.get_relevant_repos()
+        result_data = self.dp.get_topics()
+        dv.plot_barChart(result_data, "Popular topics")
     
     def get_licenses(self):
-        self.dp.get_relevant_repos()
+        result_data = self.dp.get_licenses()
+        dv.plot_barChart(result_data, "Popular licenses")
         
     def draw(self):
         draw.draw_graph(self.graph)
