@@ -1,8 +1,8 @@
-from typing import List
-from xmlrpc.client import boolean
+
 import pytest
 import sys
 sys.path.insert(0, '..')
+
 from models.interestGraph import interestGraph
 
 """
@@ -17,7 +17,7 @@ __repository_edges: int = 237
 
 
 def test_add_vertices_and_edges():
-    errors : List = []
+    errors : list = []
 
     __test_graph.add_vertices_and_edges()
     num_vertices: int = __test_graph.g.num_vertices()  
