@@ -36,13 +36,15 @@ class dataProcessing:
 
         personalized_vector = self.graph.g.new_vertex_property("double")
 
+        num_vertices = self.graph.g.num_vertices()
+
         # Repositories with more than 1000 stargazers
         starg = v_repo_st.a >= 1000  
-        personalized_vector.a[starg] += 0.1
+        personalized_vector.a[starg] = 1/num_vertices
 
         # Repositories with more than 100 forks
         forks = v_repo_forks.a >= 100 
-        personalized_vector.a[forks] += 0.1
+        personalized_vector.a[forks] = 1/num_vertices
 
         # Repositories that have been created during the last year.
         yearago = date.today() - timedelta(365)
@@ -53,7 +55,7 @@ class dataProcessing:
             if year:
                 dateobj = date(int(year), int(month), int(day))
                 res = yearago - dateobj   
-            if res.days > 0: personalized_vector[item] += 0.1
+            if res.days > 0: personalized_vector[item] = 1/num_vertices
 
         # Personalized pagerank
         pr = pagerank(self.graph.g, pers=personalized_vector)
