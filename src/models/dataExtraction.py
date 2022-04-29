@@ -84,19 +84,17 @@ class dataExtraction:
                 if api_response.status == self.__OK_STATUS_CODE:
                     await self.check_pagination(session, info, api_response, response_json, url)
                 elif api_response.status == self.__RATE_LIMIT_STATUS_CODE and self.__UNLOCK:
-                    print("Entra 1")
                     self.__UNLOCK = False
                     await self.sleep_execution(api_response)
-                    await self.request_api(stargazer, num_items, info, is_repo_url, session)
+                    response_json = await self.request_api(stargazer, num_items, info, is_repo_url, session)
                 else:
                     await asyncio.sleep(60)
-                    await self.request_api(stargazer, num_items, info, is_repo_url, session)
-                print(self.__UNLOCK)
-                print(api_response.status)
+                    response_json = await self.request_api(stargazer, num_items, info, is_repo_url, session)
                 return response_json
         else:
             await asyncio.sleep(60)
-            await self.request_api(stargazer, num_items, info, is_repo_url, session)
+            response_json = await self.request_api(stargazer, num_items, info, is_repo_url, session)
+            return response_json
             
 
     async def check_pagination(self, session, info, api_response, response_json, url):
@@ -117,10 +115,10 @@ class dataExtraction:
                 elif api_response.status == self.__RATE_LIMIT_STATUS_CODE and self.__UNLOCK:
                     self.__UNLOCK = False
                     await self.sleep_execution(api_response)
-                    await self.consume_pages(session, response_json, api_response, url, page)
+                    response_json = await self.consume_pages(session, response_json, api_response, url, page)
                 else:
                     await asyncio.sleep(60)
-                    await self.consume_pages(session, response_json, api_response, url, page)
+                    response_json = await self.consume_pages(session, response_json, api_response, url, page)
         else:
             await asyncio.sleep(60)
             await self.consume_pages(session, response_json, api_response, url, page)

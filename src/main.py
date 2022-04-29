@@ -36,5 +36,5 @@ def main() -> None:
     print(graph.g.num_vertices)
 
 if __name__ == "__main__":
-    main()
-    # cli()
+    # main()
+    cli()
