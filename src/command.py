@@ -9,8 +9,8 @@ from models.dataVisualization import dataVisualization as dv
 
 class Command:
 
-    __OPTIONS = {'user': 'get_relevant_users', 'repo': 'get_relevant_repos', 'lang': 'get_languages', 'licen': 'get_licenses',
-                'topics': 'get_topics', 'draw': 'draw', "help": 'show_help'}
+    __OPTIONS = {'users': 'get_relevant_users', 'repos': 'get_relevant_repos', 'languages': 'get_languages', 
+                'licenses': 'get_licenses', 'topics': 'get_topics', 'draw': 'draw', "help": 'show_help'}
 
     def start_cli(self) -> None:
         parser = argparse.ArgumentParser(description="GitNet")
@@ -67,19 +67,21 @@ class Command:
             
     def show_help(self):
         print("""
-        user   --> Get most important users with PageRak algorithm.
+        user        --> Get most important users with PageRak algorithm.
         
-        repo   --> Get most important repositories with personalized PageRank algorithm. 
-                   The personalization vector benefir repos with more than 1000 stargazers,
-                   more than 100 forks and those that have been created in the last year.
+        repo        --> Get most important repositories with personalized PageRank algorithm. 
+                        The personalization vector benefir repos with more than 1000 stargazers,
+                        more than 100 forks and those that have been created in the last year.
                 
-        lang   --> Get the programming language of other repositories that the stargazers
+        languages   --> Get the programming language of other repositories that the stargazers
                     stars.
 
-        topics --> Get the programming topics of other repositories that the stargazers
-                   stars. 
+        topics      --> Get the programming topics of other repositories that the stargazers
+                        stars. 
 
-        licen  --> Get the licenses language of other repositories that the stargazers
-                    stars.
+        licenses    --> Get the licenses language of other repositories that the stargazers
+                        stars.
+        
+        draw        --> Draw graph and save it in PDF format.
         
         """)
