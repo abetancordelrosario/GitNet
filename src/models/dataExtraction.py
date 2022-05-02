@@ -37,8 +37,7 @@ class dataExtraction:
 
     def __init__(self, full_name_repository: str, token: str) -> None:
         self.full_name_repository = full_name_repository
-        self.headers = {"Authorization": 'token %s' % token,
-                        "Retry-After": '5'}
+        self.headers = {"Authorization": 'token %s' % token}
 
     def fetch_data(self) -> Tuple[list,list]:
         stargazers_followers_list, stargazer_starred_repos_list = asyncio.run(self.fetch_repo_and_stargazers())
@@ -147,18 +146,16 @@ class dataExtraction:
             return self.__NO_PAGES
 
     async def sleep_execution(self, api_response: aiohttp.ClientResponse) -> None:
-        try: 
+        if 'Retry_After' in api_response.headers:
+            print("Secondary rate limit exceeded")
+            sleep_time = api_response.headers['Retry-After']
+            if sleep_time == '60': await asyncio.sleep(int(sleep_time))
+        else:
+            print("Rate limit exceeded")
             utc_reset_time = datetime.fromtimestamp(int(api_response.headers['X-RateLimit-Reset']))
             sleep_time: float = (utc_reset_time - datetime.utcnow() + timedelta(0, 5)).total_seconds()
             print(sleep_time)
-            print("Rate limit exceeded")
             await asyncio.sleep(sleep_time) 
-        except:
-            print("Secondary rate limit exceeded")
-            retry_after = api_response.headers['Retry-After']
-            s_t = int(retry_after)
-            if retry_after == '60':
-                await asyncio.sleep(60)
 
         self.__UNLOCK = True
 
