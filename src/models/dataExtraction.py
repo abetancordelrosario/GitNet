@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Tuple
+from typing import Awaitable, Tuple
 import aiohttp
 import asyncio
 import json
@@ -26,7 +26,7 @@ class dataExtraction:
     __NO_PAGES: int = 0
     __API_URL: str = "https://api.github.com/"
     __UNLOCK: bool = True
-
+    __TASK: Awaitable
     
     __RATE_LIMIT_STATUS_CODE: int = 403
     __NOT_FOUND_STATUS_CODE: int = 404
@@ -78,23 +78,20 @@ class dataExtraction:
         else:
             url: str = self.__API_URL+"users/%s/%s?per_page=%d" % (stargazer['login'], info, num_items)
 
-        if self.__UNLOCK:
-            async with session.get(url , headers=session.headers) as api_response:
-                response_json: list = await api_response.json()
-                if api_response.status == self.__OK_STATUS_CODE:
-                    response_json = await self.check_pagination(session, info, api_response, response_json, url)
-                elif api_response.status == self.__RATE_LIMIT_STATUS_CODE and self.__UNLOCK:
-                    self.__UNLOCK = False
-                    await self.sleep_execution(api_response)
-                    response_json = await self.request_api(stargazer, num_items, info, is_repo_url, session)
-                else:
-                    await asyncio.sleep(60)
-                    response_json = await self.request_api(stargazer, num_items, info, is_repo_url, session)
-                return response_json
-        else:
-            await asyncio.sleep(60)
-            response_json = await self.request_api(stargazer, num_items, info, is_repo_url, session)
+        async with session.get(url , headers=session.headers) as api_response:
+            response_json: list = await api_response.json()
+            if api_response.status == self.__OK_STATUS_CODE:
+                response_json = await self.check_pagination(session, info, api_response, response_json, url)
+            elif api_response.status == self.__RATE_LIMIT_STATUS_CODE and self.__UNLOCK:
+                self.__UNLOCK = False
+                self.__TASK = asyncio.current_task()
+                await self.sleep_execution(api_response)
+                response_json = await self.request_api(stargazer, num_items, info, is_repo_url, session)
+            else:
+                await asyncio.wait_for(self.__TASK, timeout=None)
+                response_json = await self.request_api(stargazer, num_items, info, is_repo_url, session)
             return response_json
+
             
 
     async def check_pagination(self, session, info, api_response, response_json, url):
@@ -107,31 +104,31 @@ class dataExtraction:
             pages_list = await asyncio.gather(*pages_tasks)
             consumed_pages = [item for page in pages_list for item in page]
             response_json.extend(consumed_pages)
-
+            
         return response_json
 
     async def consume_pages(self, session, api_response, url, page) -> list:
         url: str = url+"&page=%d" % page
 
-        if self.__UNLOCK:
-            async with session.get(url, headers= session.headers) as api_response:
-                response_json = await api_response.json()
-                if api_response.status == self.__RATE_LIMIT_STATUS_CODE and self.__UNLOCK:
-                    self.__UNLOCK = False
-                    await self.sleep_execution(api_response)
-                    response_json = await self.consume_pages(session, api_response, url, page)
-                else:
-                    await asyncio.sleep(60)
-                    response_json = await self.consume_pages(session, api_response, url, page)
+        async with session.get(url, headers= session.headers) as api_response:
+            response_json = await api_response.json()
+            if api_response.status == self.__OK_STATUS_CODE:
                 return response_json
-        else:
-            await asyncio.sleep(60)
-            response_json = await self.consume_pages(session, response_json, api_response, url, page)
+            elif api_response.status == self.__RATE_LIMIT_STATUS_CODE and self.__UNLOCK:
+                self.__UNLOCK = False
+                self.__TASK = asyncio.current_task()
+                await self.sleep_execution(api_response)
+                response_json = await self.consume_pages(session, api_response, url, page)
+            else:
+                await asyncio.wait_for(self.__TASK, timeout=None)
+                response_json = await self.consume_pages(session, api_response, url, page)
             return response_json
+     
             
                         
     async def fetch_main_repo(self, session) -> None:
         main_repo_url: str = self.__API_URL+"repos/%s" % self.full_name_repository
+
         async with session.get(main_repo_url, headers= session.headers) as main_repo_response:
             if main_repo_response.status == self.__OK_STATUS_CODE:
                 self.__main_repository = await main_repo_response.json()
