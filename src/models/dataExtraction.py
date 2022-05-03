@@ -6,6 +6,15 @@ import asyncio
 import json
 import re
 
+class RepoNotFound(Exception):
+
+    def __init__(self) -> None:
+        super().__init__("Resource not found. Please enter a valid repository name")
+
+class NoAuthToken(Exception):
+
+    def __init__(self, *args: object) -> None:
+        super().__init__("Authorization token not valid")
 
 class api_data(Enum):
     STARRED = "starred"
@@ -129,11 +138,15 @@ class dataExtraction:
         main_repo_url: str = self.__API_URL+"repos/%s" % self.full_name_repository
 
         async with session.get(main_repo_url, headers= session.headers) as main_repo_response:
-            if main_repo_response.status == self.__OK_STATUS_CODE:
+            if not 'X-RateLimit-Limit' in main_repo_response.headers:
+                raise NoAuthToken
+            elif main_repo_response.status == self.__OK_STATUS_CODE:
                 self.__main_repository = await main_repo_response.json()
             elif main_repo_response.status == self.__RATE_LIMIT_STATUS_CODE:
                 await self.sleep_execution(main_repo_response) 
-                self.fetch_main_repo(self, session)               
+                self.fetch_main_repo(self, session)
+            elif main_repo_response.status == self.__NOT_FOUND_STATUS_CODE:
+                raise RepoNotFound                
 
 
     async def get_number_pages(self, api_response: aiohttp.ClientResponse) -> int:
