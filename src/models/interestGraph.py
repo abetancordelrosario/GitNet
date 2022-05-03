@@ -154,3 +154,6 @@ class interestGraph:
 
     def get_no_main(self) -> VertexPropertyMap:
         return self.__v_no_main
+
+    def get_repo_name(self) -> str:
+        return self.__main_repository['name']

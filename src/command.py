@@ -6,11 +6,14 @@ from models.draw import draw
 from models.interestGraph import interestGraph
 from models.dataProcessing import dataProcessing
 from models.dataVisualization import dataVisualization as dv
+from models.manageGraph import manageGraph
 
 class Command:
 
     __OPTIONS = {'users': 'get_relevant_users', 'repos': 'get_relevant_repos', 'languages': 'get_languages', 
                 'licenses': 'get_licenses', 'topics': 'get_topics', 'draw': 'draw', "help": 'show_help'}
+
+    __FORMATS: list = ['gt', 'graphml', 'xml', 'dot',  'gml']
 
     def start_cli(self) -> None:
         parser = argparse.ArgumentParser(description="GitNet")
@@ -33,6 +36,8 @@ class Command:
                     method = getattr(self, self.__OPTIONS[text])
                     method()
                     print("-----------------------------------------")
+                elif text.split(" ")[0] == 'save' and len(text.split()) == 2:
+                    self.save_graph(text)
                 else:
                     print("""Invalid argument. Write 'help' to see valid arguments.""")
             except KeyboardInterrupt:
@@ -42,34 +47,40 @@ class Command:
         print(self.graph.g.num_vertices)
         print('GoodBye!')
 
-    def get_relevant_users(self):
+    def get_relevant_users(self) -> None:
         result_data = self.dp.get_relevant_users()
         dv.plot_barChart(result_data, "Most relevant users")
         dv.plot_pieChart(result_data, "Most relevant users")
     
-    def get_relevant_repos(self):
+    def get_relevant_repos(self) -> None:
         result_data = self.dp.get_relevant_repos()
         dv.plot_pieChart(result_data, "Most relevant repositories")
     
-    def get_languages(self):
+    def get_languages(self) -> None:
         result_data = self.dp.get_languages()
         dv.plot_barChart(result_data, "Popular programming languages")
         dv.plot_pieChart(result_data, "Most relevant languages")
         
-    def get_topics(self):
+    def get_topics(self) -> None:
         result_data = self.dp.get_topics()
         dv.plot_barChart(result_data, "Popular topics")
         dv.plot_pieChart(result_data, "Popular topics")
     
-    def get_licenses(self):
+    def get_licenses(self) -> None:
         result_data = self.dp.get_licenses()
         dv.plot_barChart(result_data, "Popular licenses")
         dv.plot_pieChart(result_data, "Popular licenses")
         
     def draw(self):
         draw.draw_graph(self.graph)
-            
-    def show_help(self):
+
+    def save_graph(self, file_format) -> None:
+        if file_format.split(" ")[1] in self.__FORMATS:
+            manageGraph.save_graph(self.graph, file_format.split(" ")[1])
+        else:
+            print("Invalid format. Write 'help' to see valid arguments.")
+
+    def show_help(self) -> None:
         print("""
         user        --> Get most important users with PageRak algorithm.
         
