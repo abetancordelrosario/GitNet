@@ -126,10 +126,10 @@ class dataExtraction:
                 self.__UNLOCK = False
                 self.__TASK = asyncio.current_task()
                 await self.sleep_execution(api_response)
-                response_json = await self.consume_pages(session, api_response, url, page)
+                response_json = await self.consume_pages(session, url, page)
             else:
                 await asyncio.wait_for(self.__TASK, timeout=None)
-                response_json = await self.consume_pages(session, api_response, url, page)
+                response_json = await self.consume_pages(session, url, page)
             return response_json
      
             
