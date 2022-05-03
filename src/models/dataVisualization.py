@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 class dataVisualization:
 
-    def plot_barChart(data: dict, title: str):
+    def plot_barChart(data: dict, title: str) -> None:
         fig, ax = plt.subplots(figsize=(12,6))
 
         data = dict(data)
@@ -39,7 +39,25 @@ class dataVisualization:
          color ='grey', ha ='right', va ='bottom',
          alpha = 0.7)    
         
-        plt.savefig("img/plot.png", bbox_inches="tight")
+        plt.savefig("img/barChart.png", bbox_inches="tight")
 
 
-    
+    def plot_pieChart(data: dict, title: str) -> None:
+        labels: list = [] 
+        sizes: list = []
+        for key, value in data:
+            labels.append(key)
+            sizes.append(value)
+        colors = ['#ff9999','#66b3ff','#99ff99','#ffcc99','#00FFFF',
+                  '#A52A2A','#5F9EA0','#7FFF00','#D2691E','#6495ED']
+        
+        fig1, ax1 = plt.subplots()
+        ax1.pie(sizes, colors = colors, labels=labels, autopct='%1.1f%%', startangle=90)
+        
+        centre_circle = plt.Circle((0,0),0.70,fc='white')
+        fig = plt.gcf()
+        fig.gca().add_artist(centre_circle)
+        
+        ax1.axis('equal')  
+        plt.tight_layout()
+        plt.savefig("img/pieChart.png")

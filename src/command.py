@@ -45,22 +45,26 @@ class Command:
     def get_relevant_users(self):
         result_data = self.dp.get_relevant_users()
         dv.plot_barChart(result_data, "Most relevant users")
+        dv.plot_pieChart(result_data, "Most relevant users")
     
     def get_relevant_repos(self):
         result_data = self.dp.get_relevant_repos()
-        dv.plot_barChart(result_data, "Most relevant repositories")
+        dv.plot_pieChart(result_data, "Most relevant repositories")
     
     def get_languages(self):
         result_data = self.dp.get_languages()
         dv.plot_barChart(result_data, "Popular programming languages")
+        dv.plot_pieChart(result_data, "Most relevant languages")
         
     def get_topics(self):
         result_data = self.dp.get_topics()
         dv.plot_barChart(result_data, "Popular topics")
+        dv.plot_pieChart(result_data, "Popular topics")
     
     def get_licenses(self):
         result_data = self.dp.get_licenses()
         dv.plot_barChart(result_data, "Popular licenses")
+        dv.plot_pieChart(result_data, "Popular licenses")
         
     def draw(self):
         draw.draw_graph(self.graph)
@@ -70,7 +74,7 @@ class Command:
         user        --> Get most important users with PageRak algorithm.
         
         repo        --> Get most important repositories with personalized PageRank algorithm. 
-                        The personalization vector benefir repos with more than 1000 stargazers,
+                        The personalization vector benefit repos with more than 1000 stargazers,
                         more than 100 forks and those that have been created in the last year.
                 
         languages   --> Get the programming language of other repositories that the stargazers
