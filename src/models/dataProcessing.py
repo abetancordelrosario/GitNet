@@ -34,10 +34,13 @@ class dataProcessing:
         v_repo_forks: VertexPropertyMap = self.graph.get_repo_forks()
         v_repo_date: VertexPropertyMap = self.graph.get_repo_date()
         v_is_user: VertexPropertyMap = self.graph.get_is_user()
+        v_no_main: VertexPropertyMap = self.graph.get_no_main()
 
-        personalized_vector = self.graph.g.new_vertex_property("double")
+        #Remove main vertex because is supernode.
+        sub_graph = GraphView(self.graph.g, v_no_main)
 
-        num_vertices = self.graph.g.num_vertices()
+        personalized_vector = sub_graph.new_vertex_property("double")
+        num_vertices = sub_graph.num_vertices()
 
         # Set 1 to users in personalized PageRank.
         users = v_is_user.a >= 1
@@ -53,17 +56,17 @@ class dataProcessing:
 
         # Repositories that have been created during the last year.
         yearago = date.today() - timedelta(365)
-        for item in self.graph.g.iter_vertices():
+        for item in sub_graph.iter_vertices():
             year = v_repo_date[item][:4]
             month = v_repo_date[item][5:7]
             day = v_repo_date[item][8:10]
             if year:
                 dateobj = date(int(year), int(month), int(day))
                 res = yearago - dateobj   
-            if res.days > 0: personalized_vector[item] = 1/num_vertices
+                if res.days > 0: personalized_vector[item] = 1/num_vertices
 
         # Personalized pagerank
-        pr = pagerank(self.graph.g, pers=personalized_vector)
+        pr = pagerank(sub_graph, pers=personalized_vector)
 
         repos: dict = {} 
         for item in self.graph.g.iter_vertices():

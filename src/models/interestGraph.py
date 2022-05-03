@@ -43,6 +43,7 @@ class interestGraph:
         self.__e_relation: EdgePropertyMap = self.g.new_edge_property("string")
         self.__v_repo_topics: VertexPropertyMap = self.g.new_vertex_property("vector<string>")
         self.__v_repo_license: VertexPropertyMap = self.g.new_vertex_property("string")
+        self.__v_no_main: VertexPropertyMap = self.g.new_vertex_property("bool")
 
 
     def create_graph(self) -> None:
@@ -92,6 +93,7 @@ class interestGraph:
     def create_main_vertex(self) -> Vertex:
         self.create_repository_vertex(self.__main_repository)
         main_vertex: Vertex = self.g.vertex(0)
+        self.__v_no_main[main_vertex] = False
         return main_vertex
 
 
@@ -99,12 +101,14 @@ class interestGraph:
         vertex = self.g.add_vertex()
         self.__v_is_user[vertex] = True
         self.__v_name[vertex] = vertex_info['login']
+        self.__v_no_main[vertex] = True
         return vertex
 
 
     def create_repository_vertex(self, vertex_info: json) -> Vertex:
         vertex = self.g.add_vertex()
         self.__v_is_repo[vertex] = True
+        self.__v_no_main[vertex] = True
         self.__v_name[vertex] = vertex_info['name']
         self.__v_repo_st[vertex] = vertex_info['stargazers_count']
         self.__v_repo_lang[vertex] = vertex_info['language']
@@ -147,3 +151,6 @@ class interestGraph:
 
     def get_repo_license(self) -> VertexPropertyMap:
         return self.__v_repo_license                     
+
+    def get_no_main(self) -> VertexPropertyMap:
+        return self.__v_no_main
