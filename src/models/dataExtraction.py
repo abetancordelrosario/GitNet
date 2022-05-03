@@ -13,7 +13,7 @@ class RepoNotFound(Exception):
 
 class NoAuthToken(Exception):
 
-    def __init__(self, *args: object) -> None:
+    def __init__(self) -> None:
         super().__init__("Authorization token not valid")
 
 class api_data(Enum):
@@ -107,7 +107,7 @@ class dataExtraction:
             num_pages: int = await self.get_number_pages(api_response)
             pages_tasks = []
             for page in range(2, num_pages+1):
-                page_task = asyncio.ensure_future(self.consume_pages(session, api_response, url, page))
+                page_task = asyncio.ensure_future(self.consume_pages(session, url, page))
                 pages_tasks.append(page_task)
             pages_list = await asyncio.gather(*pages_tasks)
             consumed_pages = [item for page in pages_list for item in page]
@@ -115,7 +115,7 @@ class dataExtraction:
             
         return response_json
 
-    async def consume_pages(self, session, api_response, url, page) -> list:
+    async def consume_pages(self, session, url, page) -> list:
         url: str = url+"&page=%d" % page
 
         async with session.get(url, headers= session.headers) as api_response:
@@ -138,7 +138,7 @@ class dataExtraction:
         main_repo_url: str = self.__API_URL+"repos/%s" % self.full_name_repository
 
         async with session.get(main_repo_url, headers= session.headers) as main_repo_response:
-            if not 'X-RateLimit-Limit' in main_repo_response.headers:
+            if not 'X-OAuth-Scopes' in main_repo_response.headers:
                 raise NoAuthToken
             elif main_repo_response.status == self.__OK_STATUS_CODE:
                 self.__main_repository = await main_repo_response.json()
