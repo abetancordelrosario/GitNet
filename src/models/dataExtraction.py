@@ -146,7 +146,7 @@ class dataExtraction:
             return self.__NO_PAGES
 
     async def sleep_execution(self, api_response: aiohttp.ClientResponse) -> None:
-        if 'Retry_After' in api_response.headers:
+        if 'Retry-After' in api_response.headers:
             print("Secondary rate limit exceeded")
             sleep_time = api_response.headers['Retry-After']
             if sleep_time == '60': await asyncio.sleep(int(sleep_time))
