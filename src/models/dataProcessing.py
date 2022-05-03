@@ -33,10 +33,15 @@ class dataProcessing:
         v_repo_st: VertexPropertyMap = self.graph.get_repo_st()
         v_repo_forks: VertexPropertyMap = self.graph.get_repo_forks()
         v_repo_date: VertexPropertyMap = self.graph.get_repo_date()
+        v_is_user: VertexPropertyMap = self.graph.get_is_user()
 
         personalized_vector = self.graph.g.new_vertex_property("double")
 
         num_vertices = self.graph.g.num_vertices()
+
+        # Set 1 to users in personalized PageRank.
+        users = v_is_user.a >= 1
+        personalized_vector.a[users] = 1/num_vertices
 
         # Repositories with more than 1000 stargazers
         starg = v_repo_st.a >= 1000  
