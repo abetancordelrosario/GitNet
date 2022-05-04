@@ -17,18 +17,15 @@ class Command:
 
     def start_cli(self) -> None:
         parser = argparse.ArgumentParser(description="GitNet")
-        parser.add_argument("-r", "--repository", required=True, help="Enter full name of the repository (author/repo)")
-        parser.add_argument("-t", "--token", required=True, help="Enter OAuth GitHub token")
+        group = parser.add_argument_group('group')
+        group.add_argument("-r", "--repository", help="Enter full name of the repository (author/repo)")
+        group.add_argument("-t", "--token", help="Enter OAuth GitHub token")
+        parser.add_argument("-l", "--load", help="Enter the name of a graph file")
         args = parser.parse_args()
-        self.repl(args.repository, args.token)
+        self.process_arguments(args.repository, args.token, args.load)
 
-
-    def repl(self, repository, token) -> None:
+    def repl(self) -> None:
         session = PromptSession()
-        extract = dataExtraction(repository,token)
-        self.graph = interestGraph(extract)
-        self.graph.create_graph()
-        self.dp = dataProcessing(self.graph)
         while True:
             try:
                 text = session.prompt('> ')
@@ -44,8 +41,23 @@ class Command:
                 continue
             except EOFError:
                 break
+        g_props = self.graph.g.list_properties()
+        print(g_props)
         print(self.graph.g.num_vertices)
         print('GoodBye!')
+    
+    def process_arguments(self, repository: str, token: str, load: str):
+        if load is None:
+            extract = dataExtraction(repository,token)
+            self.graph = interestGraph(extract)
+            self.graph.create_graph()
+            self.dp = dataProcessing(self.graph)
+            self.repl()
+        else:
+            g = manageGraph.load(load)
+            self.graph = interestGraph(g)
+            self.dp = dataProcessing(self.graph)
+            self.repl()
 
     def get_relevant_users(self) -> None:
         result_data = self.dp.get_relevant_users()

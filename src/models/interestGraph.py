@@ -21,11 +21,15 @@ class interestGraph:
     __stargazers_starred_repos: list = []
     __stargazers_followers: list = []
 
-    def __init__(self, extract_data: dataExtraction) -> None:
-        self.g = Graph(directed=True)
-        self.extract_data = extract_data
-        self.extract_data_from_api()
-        self.set_graph_properties()
+    def __init__(self, arg) -> None:
+        if isinstance(arg, dataExtraction):
+            self.g = Graph(directed=True)
+            self.extract_data = arg
+            self.extract_data_from_api()
+            self.set_graph_properties()
+        else:
+            self.g = arg
+            self.load_graph_properties()
 
     def extract_data_from_api(self):
         self.__stargazers_starred_repos, self.__stargazers_followers = self.extract_data.fetch_data()
@@ -124,6 +128,9 @@ class interestGraph:
         actual_edge: Edge = self.g.add_edge(actual_vertex,main_vertex)
         self.__e_relation[actual_edge] = relation
 
+    def load_graph_properties(self) -> None:
+        g_props = self.g.list_properties()
+        print(g_props)
 
     def get_name(self) -> VertexPropertyMap:
         return self.__v_name
