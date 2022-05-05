@@ -41,8 +41,6 @@ class Command:
                 continue
             except EOFError:
                 break
-        g_props = self.graph.g.list_properties()
-        print(g_props)
         print(self.graph.g.num_vertices)
         print('GoodBye!')
     
