@@ -138,13 +138,13 @@ class dataExtraction:
         main_repo_url: str = self.__API_URL+"repos/%s" % self.full_name_repository
 
         async with session.get(main_repo_url, headers= session.headers) as main_repo_response:
-            if not 'X-OAuth-Scopes' in main_repo_response.headers:
+            if 'X-OAuth-Scopes' not in main_repo_response.headers:
                 raise NoAuthToken
             elif main_repo_response.status == self.__OK_STATUS_CODE:
                 self.__main_repository = await main_repo_response.json()
             elif main_repo_response.status == self.__RATE_LIMIT_STATUS_CODE:
                 await self.sleep_execution(main_repo_response) 
-                self.fetch_main_repo(self, session)
+                self.fetch_main_repo(session)
             elif main_repo_response.status == self.__NOT_FOUND_STATUS_CODE:
                 raise RepoNotFound                
 

@@ -17,7 +17,7 @@ class interestGraph:
     """
 
     __main_repository: json
-    __stargazers = list = []
+    __stargazers: list = []
     __stargazers_starred_repos: list = []
     __stargazers_followers: list = []
 
