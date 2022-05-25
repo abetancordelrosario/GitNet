@@ -38,7 +38,7 @@ class Command:
                 else:
                     print("""Invalid argument. Write 'help' to see valid arguments.""")
             except KeyboardInterrupt:
-                continue
+                break
             except EOFError:
                 break
         print(self.graph.g.num_vertices)
@@ -87,6 +87,7 @@ class Command:
     def save_graph(self, file_format) -> None:
         if file_format.split(" ")[1] in self.__FORMATS:
             manageGraph.save_graph(self.graph, file_format.split(" ")[1])
+            print("Graph have been saved correctly in /data folder")
         else:
             print("Invalid format. Write 'help' to see valid arguments.")
 
@@ -99,14 +100,17 @@ class Command:
                         more than 100 forks and those that have been created in the last year.
                 
         languages   --> Get the programming language of other repositories that the stargazers
-                    stars.
+                        stars.
 
         topics      --> Get the programming topics of other repositories that the stargazers
                         stars. 
 
-        licenses    --> Get the licenses language of other repositories that the stargazers
+        licenses    --> Get the licenses of other repositories that the stargazers
                         stars.
         
         draw        --> Draw graph and save it in PDF format.
+
+        save        --> Save the graph. The second parameter is the format of the file, gt (recommended), 
+                        graphml, xml , dot ,  gml. 
         
         """)

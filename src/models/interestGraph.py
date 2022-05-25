@@ -130,7 +130,7 @@ class interestGraph:
 
     def load_graph_properties(self) -> None:
         g_props = self.g.list_properties()
-        print(g_props)
+        # print(g_props)
 
     def get_name(self) -> VertexPropertyMap:
         return self.__v_name
