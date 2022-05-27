@@ -16,6 +16,11 @@ class NoAuthToken(Exception):
     def __init__(self) -> None:
         super().__init__("Authorization token not valid")
 
+class ServerError(Exception):
+
+    def __init__(self) -> None:
+        super().__init__("Server Error. Try again later")
+
 class api_data(Enum):
     STARRED = "starred"
     FOLLOWERS = "followers" 
@@ -40,6 +45,7 @@ class dataExtraction:
     __RATE_LIMIT_STATUS_CODE: int = 403
     __NOT_FOUND_STATUS_CODE: int = 404
     __OK_STATUS_CODE: int = 200
+    __SERVER_ERROR_CODE: int = 502
 
     __stargazers: list = []
     __main_repository: json
@@ -95,6 +101,8 @@ class dataExtraction:
                 self.__TASK = asyncio.current_task()
                 await self.sleep_execution(api_response)
                 response_json = await self.request_api(stargazer, num_items, info, is_repo_url, session)
+            elif api_response.status == self.__SERVER_ERROR_CODE:
+                raise ServerError
             else:
                 await asyncio.wait_for(self.__TASK, timeout=None)
                 response_json = await self.request_api(stargazer, num_items, info, is_repo_url, session)
