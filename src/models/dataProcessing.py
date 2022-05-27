@@ -3,7 +3,6 @@ from datetime import date, timedelta
 from graph_tool.all import *
 
 from models import interestGraph
-from models.dataVisualization import dataVisualization as dv
 
 
 class dataProcessing:
@@ -79,7 +78,7 @@ class dataProcessing:
         return list(ordered_repos.items())[:10]
            
 
-    def get_topics(self) -> dict:
+    def get_topics(self) -> list:
         v_repo_topics: VertexPropertyMap = self.graph.get_repo_topics()
         v_is_repo: VertexPropertyMap = self.graph.get_is_repo()
         sub_graph = GraphView(self.graph.g, v_is_repo)
@@ -97,7 +96,7 @@ class dataProcessing:
         self.print_map(ordered_topics)
         return list(ordered_topics.items())[:10]
         
-    def get_languages(self) -> dict:
+    def get_languages(self) -> list:
         v_repo_lang: VertexPropertyMap = self.graph.get_repo_lang()
         v_is_repo: VertexPropertyMap = self.graph.get_is_repo()
         sub_graph = GraphView(self.graph.g, v_is_repo)
@@ -115,7 +114,7 @@ class dataProcessing:
         return list(ordererd_languages.items())[:10]
 
 
-    def get_licenses(self) -> dict:
+    def get_licenses(self) -> list:
         v_repo_license = self.graph.get_repo_license()
         v_is_repo: VertexPropertyMap = self.graph.get_is_repo()
         sub_graph = GraphView(self.graph.g, v_is_repo)
@@ -132,7 +131,7 @@ class dataProcessing:
         self.print_map(ordered_licenses)
         return list(ordered_licenses.items())[:10]
 
-    def print_map(self, topi):
+    def print_map(self, topi) -> None:
         for key,value in islice(topi.items(), 0, 10):
             print(key, ':', value)
     

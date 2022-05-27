@@ -42,7 +42,7 @@ class dataVisualization:
         plt.savefig("img/barChart.png", bbox_inches="tight")
 
 
-    def plot_pieChart(data: dict, title: str) -> None:
+    def plot_pieChart(data: dict) -> None:
         labels: list = [] 
         sizes: list = []
         for key, value in data:

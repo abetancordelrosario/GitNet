@@ -60,26 +60,26 @@ class Command:
     def get_relevant_users(self) -> None:
         result_data = self.dp.get_relevant_users()
         dv.plot_barChart(result_data, "Most relevant users")
-        dv.plot_pieChart(result_data, "Most relevant users")
+        dv.plot_pieChart(result_data)
     
     def get_relevant_repos(self) -> None:
         result_data = self.dp.get_relevant_repos()
-        dv.plot_pieChart(result_data, "Most relevant repositories")
+        dv.plot_pieChart(result_data)
     
     def get_languages(self) -> None:
         result_data = self.dp.get_languages()
         dv.plot_barChart(result_data, "Popular programming languages")
-        dv.plot_pieChart(result_data, "Most relevant languages")
+        dv.plot_pieChart(result_data)
         
     def get_topics(self) -> None:
         result_data = self.dp.get_topics()
         dv.plot_barChart(result_data, "Popular topics")
-        dv.plot_pieChart(result_data, "Popular topics")
+        dv.plot_pieChart(result_data)
     
     def get_licenses(self) -> None:
         result_data = self.dp.get_licenses()
         dv.plot_barChart(result_data, "Popular licenses")
-        dv.plot_pieChart(result_data, "Popular licenses")
+        dv.plot_pieChart(result_data)
         
     def draw(self):
         draw.draw_graph(self.graph)
