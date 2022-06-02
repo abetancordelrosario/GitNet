@@ -23,7 +23,7 @@ class dataProcessing:
         ordered_users = dict(sorted(users.items(), key=lambda item: item[1], reverse = True))
         print("*** Most relevant users ***")
         self.print_map(ordered_users)
-        return list(ordered_users.items())[:10]
+        return list(ordered_users.items())
        
 
     def get_relevant_repos(self) -> list:
@@ -62,7 +62,7 @@ class dataProcessing:
             if year:
                 dateobj = date(int(year), int(month), int(day))
                 res = yearago - dateobj   
-                if res.days > 0: personalized_vector[item] = 1/num_vertices
+                if res.days < 0: personalized_vector[item] = 1/num_vertices
 
         # Personalized pagerank
         pr = pagerank(sub_graph, pers=personalized_vector)
@@ -75,7 +75,7 @@ class dataProcessing:
         ordered_repos = dict(sorted(repos.items(), key=lambda item: item[1], reverse = True))
         print("*** Most relevant repos ***")
         self.print_map(ordered_repos)
-        return list(ordered_repos.items())[:10]
+        return list(ordered_repos.items())
            
 
     def get_topics(self) -> list:
@@ -94,7 +94,7 @@ class dataProcessing:
         ordered_topics = dict(sorted(topics.items(), key=lambda item: item[1], reverse = True))    
         print("*** Topics ***")
         self.print_map(ordered_topics)
-        return list(ordered_topics.items())[:10]
+        return list(ordered_topics.items())
         
     def get_languages(self) -> list:
         v_repo_lang: VertexPropertyMap = self.graph.get_repo_lang()
@@ -111,7 +111,7 @@ class dataProcessing:
         ordererd_languages = dict(sorted(languages.items(), key=lambda item: item[1], reverse = True))
         print("*** Languages ***")
         self.print_map(ordererd_languages)
-        return list(ordererd_languages.items())[:10]
+        return list(ordererd_languages.items())
 
 
     def get_licenses(self) -> list:
@@ -129,7 +129,7 @@ class dataProcessing:
         ordered_licenses = dict(sorted(licenses.items(), key=lambda item: item[1], reverse = True))    
         print("*** Licenses ***")
         self.print_map(ordered_licenses)
-        return list(ordered_licenses.items())[:10]
+        return list(ordered_licenses.items())
 
     def print_map(self, topi) -> None:
         for key,value in islice(topi.items(), 0, 10):

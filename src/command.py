@@ -1,11 +1,12 @@
 import argparse
 from prompt_toolkit import PromptSession
+from models.XGBoost.xgbDataProcessing import xgbDataProcessing
 
 from models.dataExtraction import dataExtraction
 from models.draw import draw
 from models.interestGraph import interestGraph
 from models.dataProcessing import dataProcessing
-from models.dataVisualization import dataVisualization as dv
+from models.dataVisualization import dataVisualization
 from models.manageGraph import manageGraph
 
 class Command:
@@ -49,37 +50,44 @@ class Command:
             extract = dataExtraction(repository,token)
             self.graph = interestGraph(extract)
             self.graph.create_graph()
+
+            x = xgbDataProcessing()
+            x.create_dataframe(self.graph)
+
             self.dp = dataProcessing(self.graph)
+            self.dv = dataVisualization()
             self.repl()
         else:
             g = manageGraph.load(load)
             self.graph = interestGraph(g)
             self.dp = dataProcessing(self.graph)
+            self.dv = dataVisualization()
             self.repl()
 
     def get_relevant_users(self) -> None:
         result_data = self.dp.get_relevant_users()
-        dv.plot_barChart(result_data, "Most relevant users")
-        dv.plot_pieChart(result_data)
+        self.dv.plot_barChart(result_data, "Most relevant users")
+        self.dv.plot_pieChart(result_data)
     
     def get_relevant_repos(self) -> None:
         result_data = self.dp.get_relevant_repos()
-        dv.plot_pieChart(result_data)
+        self.dv.plot_pieChart(result_data)
+        self.dv.fork_relationship(result_data, self.graph)
     
     def get_languages(self) -> None:
         result_data = self.dp.get_languages()
-        dv.plot_barChart(result_data, "Popular programming languages")
-        dv.plot_pieChart(result_data)
+        self.dv.plot_barChart(result_data, "Popular programming languages")
+        self.dv.plot_pieChart(result_data)
         
     def get_topics(self) -> None:
         result_data = self.dp.get_topics()
-        dv.plot_barChart(result_data, "Popular topics")
-        dv.plot_pieChart(result_data)
+        self.dv.plot_barChart(result_data, "Popular topics")
+        self.dv.plot_pieChart(result_data)
     
     def get_licenses(self) -> None:
         result_data = self.dp.get_licenses()
-        dv.plot_barChart(result_data, "Popular licenses")
-        dv.plot_pieChart(result_data)
+        self.dv.plot_barChart(result_data, "Popular licenses")
+        self.dv.plot_pieChart(result_data)
         
     def draw(self):
         draw.draw_graph(self.graph)

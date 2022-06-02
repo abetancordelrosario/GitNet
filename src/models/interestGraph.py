@@ -1,6 +1,7 @@
 from enum import Enum
 from graph_tool.all import *
 import json
+
 from models.dataExtraction import dataExtraction
 
 class relationship(Enum):
@@ -48,7 +49,6 @@ class interestGraph:
         self.__v_repo_topics: VertexPropertyMap = self.g.new_vertex_property("vector<string>")
         self.__v_repo_license: VertexPropertyMap = self.g.new_vertex_property("string")
         self.__v_no_main: VertexPropertyMap = self.g.new_vertex_property("bool")
-
 
     def create_graph(self) -> None:
         main_vertex: Vertex = self.create_main_vertex()
@@ -113,7 +113,7 @@ class interestGraph:
         vertex = self.g.add_vertex()
         self.__v_is_repo[vertex] = True
         self.__v_no_main[vertex] = True
-        self.__v_name[vertex] = vertex_info['name']
+        self.__v_name[vertex] = vertex_info['full_name']
         self.__v_repo_st[vertex] = vertex_info['stargazers_count']
         self.__v_repo_lang[vertex] = vertex_info['language']
         self.__v_repo_forks[vertex] = vertex_info['forks_count']
@@ -164,3 +164,6 @@ class interestGraph:
 
     def get_repo_name(self) -> str:
         return self.__main_repository['name']
+
+    def get_stargazers_starred_repos(self) -> list:
+        return self.__stargazers_starred_repos
