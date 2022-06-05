@@ -9,6 +9,7 @@ class xgbTrain:
         
         df = pd.read_csv("data/AliceVision")
         names = df.pop("open_issues_count")
+        names = df.pop("Unnamed: 0")
  
 
         relevant_df = df[df['is_relevant'] == 1]
@@ -62,8 +63,6 @@ class xgbTrain:
 
         print("-------------------------")
 
-        print("-------------------------")
-
         xgb1 = xgboost.XGBClassifier(objective= 'binary:logistic',
                                     learning_rate=0.3,
                                     n_estimators=100,
@@ -81,7 +80,7 @@ class xgbTrain:
         model = xgboost.XGBClassifier()
         model.load_model("xgb_model/model.json")
 
-
+        print(X_valid)
         y = model.predict(X_valid)
         print(y.tolist())
         

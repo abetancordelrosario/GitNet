@@ -88,8 +88,8 @@ class Command:
 
     def get_relevant_repos_xgb(self) -> None:
         xgbdata = xgbDataProcessing()
-        xgbdataframe = xgbdata.create_dataframe(self.graph)
-        self.dp.xgboost_repos(xgbdataframe)
+        xgbdataframe, names_column = xgbdata.create_dataframe(self.graph)
+        self.dp.xgboost_repos(xgbdataframe, names_column)
         
     def draw(self):
         draw.draw_graph(self.graph)

@@ -1,3 +1,4 @@
+from typing import Tuple
 import pandas as pd
 from datetime import date, timedelta
 
@@ -7,7 +8,7 @@ from ..dataProcessing import dataProcessing
 
 class xgbDataProcessing:
     
-    def create_dataframe(self, graph: interestGraph) -> None:
+    def create_dataframe(self, graph: interestGraph) -> Tuple:
         main_repo: str =  graph.get_repo_name()
         stargazers_starred: list = graph.get_stargazers_starred_repos()
         starred_repos: list = [repo for stargazer in stargazers_starred for repo in stargazer]
@@ -45,15 +46,14 @@ class xgbDataProcessing:
 
         # for index in remove_df_list:
         #     df.drop(index, inplace=True)
-
-        # df.to_csv(f"data/{main_repo}-name")
         
         # df.to_csv(f"data/{main_repo}")
         names = df.pop("full_name")
         # xgb = xgbTrain()
         # xgb.train_model(df)
+        df.to_csv(f"data/temp")
 
-        return df
+        return df, names
 
 
     def set_created_at_value(self, df: pd.DataFrame) -> None:

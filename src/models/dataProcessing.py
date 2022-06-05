@@ -1,5 +1,6 @@
 from itertools import islice
 from datetime import date, timedelta
+import os
 from graph_tool.all import *
 import xgboost
 import pandas as pd
@@ -138,11 +139,24 @@ class dataProcessing:
             print(key, ':', value)
     
 
-    def xgboost_repos(self, df: pd.DataFrame) -> None:
+    def xgboost_repos(self, df: pd.DataFrame, names_column: pd.DataFrame) -> None:
+        df = pd.read_csv("data/temp")
+        df.pop("Unnamed: 0")
         model = xgboost.XGBClassifier()
         model.load_model("xgb_model/model.json")
-        y = model.predict(df)
-        print(y.tolist())
+        result = model.predict(df)
+        os.remove("data/temp")
+
+        df['is_relevant'] = result.tolist()
+
+        df.insert(loc=0, column='full_name', value=names_column)
+        df.sort_values(by=['count'], inplace=True, ascending=False)
+
+        df = df[df.is_relevant != 0]
+        df = df.head(30)
+
+        df.to_csv("xgb_model/result", index=False)
+        print("The result has been saved in the 'xgb_model' file")
 
            
     
