@@ -12,7 +12,8 @@ from models.manageGraph import manageGraph
 class Command:
 
     __OPTIONS = {'users': 'get_relevant_users', 'repos': 'get_relevant_repos', 'languages': 'get_languages', 
-                'licenses': 'get_licenses', 'topics': 'get_topics', 'draw': 'draw', "help": 'show_help'}
+                'licenses': 'get_licenses', 'topics': 'get_topics', 'draw': 'draw', "help": 'show_help',
+                'repos_xgb': 'get_relevant_repos_xgb'}
 
     __FORMATS: list = ['gt', 'graphml', 'xml', 'dot',  'gml']
 
@@ -50,10 +51,6 @@ class Command:
             extract = dataExtraction(repository,token)
             self.graph = interestGraph(extract)
             self.graph.create_graph()
-
-            x = xgbDataProcessing()
-            x.create_dataframe(self.graph)
-
             self.dp = dataProcessing(self.graph)
             self.dv = dataVisualization()
             self.repl()
@@ -88,6 +85,11 @@ class Command:
         result_data = self.dp.get_licenses()
         self.dv.plot_barChart(result_data, "Popular licenses")
         self.dv.plot_pieChart(result_data)
+
+    def get_relevant_repos_xgb(self) -> None:
+        xgbdata = xgbDataProcessing()
+        xgbdataframe = xgbdata.create_dataframe(self.graph)
+        self.dp.xgboost_repos(xgbdataframe)
         
     def draw(self):
         draw.draw_graph(self.graph)

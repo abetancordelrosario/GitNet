@@ -1,6 +1,8 @@
 from itertools import islice
 from datetime import date, timedelta
 from graph_tool.all import *
+import xgboost
+import pandas as pd
 
 from models import interestGraph
 
@@ -47,11 +49,11 @@ class dataProcessing:
 
         # Repositories with more than 1000 stargazers
         starg = v_repo_st.a >= 1000  
-        personalized_vector.a[starg] = 1/num_vertices
+        personalized_vector.a[starg] += 1/num_vertices
 
         # Repositories with more than 100 forks
         forks = v_repo_forks.a >= 100 
-        personalized_vector.a[forks] = 1/num_vertices
+        personalized_vector.a[forks] += 1/num_vertices
 
         # Repositories that have been created during the last year.
         yearago = date.today() - timedelta(365)
@@ -62,11 +64,11 @@ class dataProcessing:
             if year:
                 dateobj = date(int(year), int(month), int(day))
                 res = yearago - dateobj   
-                if res.days < 0: personalized_vector[item] = 1/num_vertices
+                if res.days < 0: personalized_vector[item] += 1/num_vertices
 
         # Personalized pagerank
         pr = pagerank(sub_graph, pers=personalized_vector)
-
+        
         repos: dict = {} 
         for item in self.graph.g.iter_vertices():
             if v_is_repo[item] == 1:
@@ -135,6 +137,12 @@ class dataProcessing:
         for key,value in islice(topi.items(), 0, 10):
             print(key, ':', value)
     
+
+    def xgboost_repos(self, df: pd.DataFrame) -> None:
+        model = xgboost.XGBClassifier()
+        model.load_model("xgb_model/model.json")
+        y = model.predict(df)
+        print(y.tolist())
 
            
     
