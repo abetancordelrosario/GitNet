@@ -9,7 +9,7 @@ from ..dataProcessing import dataProcessing
 class xgbDataProcessing:
     
     def create_dataframe(self, graph: interestGraph) -> Tuple:
-        main_repo: str =  graph.get_repo_name()
+        # main_repo: str =  graph.get_repo_name()
         stargazers_starred: list = graph.get_stargazers_starred_repos()
         starred_repos: list = [repo for stargazer in stargazers_starred for repo in stargazer]
         

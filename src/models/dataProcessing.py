@@ -152,11 +152,15 @@ class dataProcessing:
         df.insert(loc=0, column='full_name', value=names_column)
         df.sort_values(by=['count'], inplace=True, ascending=False)
 
+
         df = df[df.is_relevant != 0]
+        df = df.dropna()
         df = df.head(30)
 
+
+
         df.to_csv("xgb_model/result", index=False)
-        print("The result has been saved in the 'xgb_model' file")
+        print("The result has been saved in the 'xgb_model' folder")
 
            
     
