@@ -29,16 +29,19 @@ class xgbTrain:
         parametres = {  'objective': ['binary:logistic'],
                         'learning_rate': [0.25],
                         'n_estimators': [100],
+                        'reg_alpha': [1],
                         'gamma': [0],
                         'early_stopping_rounds': [20],
                         'eval_metric': ['aucpr'],
-                        'max_depth': [4]
+                        'max_depth': [5]
                         }
 
         fit_params = { 'eval_set': [(X_test, y_test)]}
 
         clf =  GridSearchCV(xgb, parametres, cv=5, scoring='average_precision')
         clf.fit(X_train, y_train, **fit_params)
+
+
         print(clf.best_estimator_)
         print(clf.best_params_)
         print("Testing")
@@ -78,7 +81,7 @@ class xgbTrain:
                                     n_estimators=100,
                                     gamma=0,
                                     eval_metric='aucpr',
-                                    max_depth=4
+                                    max_depth=5
                                     )
 
 

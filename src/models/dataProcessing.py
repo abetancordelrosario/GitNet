@@ -157,8 +157,6 @@ class dataProcessing:
         df = df.dropna()
         df = df.head(30)
 
-
-
         df.to_csv("xgb_model/result", index=False)
         print("The result has been saved in the 'xgb_model' folder")
 
