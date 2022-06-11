@@ -6,3 +6,11 @@ __pycache__
 
 #VisualCode Studio
 .vscode
+
+#sonarqube
+.scannerwork
+
+#Project files
+data/
+img/
+xgb_model/result
