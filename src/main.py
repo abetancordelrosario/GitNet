@@ -2,9 +2,8 @@ from command import Command
 from models.XGBoost.xgbTrain import xgbTrain
 
 def train():
-    
     xgb = xgbTrain()
-    xgb.train_model(None)
+    xgb.cross_validation(None)
 
 def main() -> None:
     cli = Command()
