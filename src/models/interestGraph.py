@@ -82,7 +82,7 @@ class interestGraph:
                     pass
 
 
-    def add_starred_repos(self, new_vertex: Vertex, main_vertex: Vertex, index: int):
+    def add_starred_repos(self, new_vertex: Vertex, main_vertex: Vertex, index: int) -> None:
         starred_repos: list = self.__stargazers_starred_repos[index]
 
         for starred in starred_repos:
