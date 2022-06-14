@@ -125,5 +125,7 @@ class Command:
 
         save        --> Save the graph. The second parameter is the format of the file, gt (recommended), 
                         graphml, xml , dot ,  gml. 
+
+        repos_xgb   --> Predict most important repositories using XGBoost modell.
         
         """)
