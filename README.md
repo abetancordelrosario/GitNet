@@ -12,7 +12,7 @@ Este Trabajo Fin de Título desarrollado en la Universidad de Las Palmas de Gran
 Se recomienda utilizar Visual Studio Code como IDE ya que dispone de múltiples extensiones que facilitan trabajar con Docker o lenguajes de programación como Python.
 
 ### Instalación
-Para descargar la aplicación primero de ejecuta.
+Para descargar la aplicación primero se introduce.
 ```
 git clone https://github.com/abetancordelrosario/GitNet.git
 ```
