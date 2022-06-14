@@ -11,6 +11,7 @@ __pycache__
 .scannerwork
 
 #Project files
-data/
-img/
+img/fork-stargazers.png
+img/barChart.png
+img/pieChart.png
 xgb_model/result
