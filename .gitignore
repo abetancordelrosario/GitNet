@@ -12,6 +12,5 @@ __pycache__
 
 #Project files
 img/fork-stargazers.png
-img/barChart.png
 img/pieChart.png
 xgb_model/result
