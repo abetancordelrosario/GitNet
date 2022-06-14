@@ -7,6 +7,11 @@ from ..interestGraph import interestGraph
 from ..dataProcessing import dataProcessing 
 
 class xgbDataProcessing:
+    '''
+    Generate dataframe with the data fetched from the GitHub
+    API, then clean the data for creating the training dataset,
+    or for creating the dataset for the prediction.
+    '''
     
     def create_dataframe(self, graph: interestGraph) -> Tuple:
         stargazers_starred: list = graph.get_stargazers_starred_repos()

@@ -10,6 +10,9 @@ from models.dataVisualization import dataVisualization
 from models.manageGraph import manageGraph
 
 class Command:
+    '''
+    Project's command line interface. 
+    '''
 
     __OPTIONS = {'users': 'get_relevant_users', 'repos': 'get_relevant_repos', 'languages': 'get_languages', 
                 'licenses': 'get_licenses', 'topics': 'get_topics', 'draw': 'draw', "help": 'show_help',

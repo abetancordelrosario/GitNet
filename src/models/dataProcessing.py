@@ -9,6 +9,12 @@ from models import interestGraph
 
 
 class dataProcessing:
+    '''
+    Apply algorithms to the graph for extraction relevant 
+    information about users and repositories.
+
+    The contructor requires an "interestGraph" object.
+    '''
 
     def __init__(self, graph: interestGraph) -> None:
         self.graph = graph

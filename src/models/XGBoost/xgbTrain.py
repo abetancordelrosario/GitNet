@@ -5,6 +5,10 @@ from sklearn.metrics import average_precision_score
 import xgboost
 
 class xgbTrain:
+    '''
+    Create the machine learning model using cross-validation
+    to get the best hyperparametres.
+    '''
 
     def cross_validation(self, df: pd.DataFrame) -> None:
         df = pd.read_csv("data/AliceVision")

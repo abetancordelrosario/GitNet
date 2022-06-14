@@ -7,6 +7,13 @@ from models.interestGraph import interestGraph
 
 
 class dataVisualization:
+    '''
+    Visualize the results unsing graphics generated with
+    matplotlib.
+
+    The graphics could be a horinzontal bar chart, pie chart or
+    linear regression chart.
+    '''
 
     def plot_barChart(self, data: dict, title: str) -> None:
         fig, ax = plt.subplots(figsize=(12,6))
