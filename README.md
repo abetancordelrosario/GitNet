@@ -24,7 +24,7 @@ docker build --pull --rm -f "Dockerfile" -t gitnet:latest "."
 docker run -it gitnet:latest /bin/bash
 ```
 
-Finalmente para ejecutar la aplicación.
+Finalmente, para ejecutar la aplicación.
 ```
 /bin/python /app/src/main.py -r <nombre completo repositorio> -t <token OAuth>
 ```
