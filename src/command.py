@@ -99,7 +99,7 @@ class Command:
 
     def save_graph(self, file_format) -> None:
         if file_format.split(" ")[1] in self.__FORMATS:
-            manageGraph.save_graph(self.graph, file_format.split(" ")[1])
+            manageGraph.save_graph(self.graph)
             print("Graph have been saved correctly in /data folder")
         else:
             print("Invalid format. Write 'help' to see valid arguments.")
