@@ -11,6 +11,27 @@ Este Trabajo Fin de Título desarrollado en la Universidad de Las Palmas de Gran
 
 Se recomienda utilizar Visual Studio Code como IDE ya que dispone de múltiples extensiones que facilitan trabajar con Docker o lenguajes de programación como Python.
 
+### Instalación
+Para descargar la aplicación primero se introduce.
+```
+git clone https://github.com/abetancordelrosario/GitNet.git
+```
+
+Luego, para construir la imágen de docker y ejecutarla.
+```
+docker build --pull --rm -f "Dockerfile" -t gitnet:latest "."
+
+docker run -it gitnet:latest /bin/bash
+```
+
+Finalmente, para ejecutar la aplicación.
+```
+/bin/python /app/src/main.py -r <nombre completo repositorio> -t <token OAuth>
+```
+Sin embargo, se recomienda utilizar la herramienta <i>remote containers</i> de VScode ya que automatiza el proceso de construir y ejecutar la imágen. En este caso el comando para ejecutar la aplicación sería.
+```
+/bin/python /workspaces/GitNet/src/main.py -r <nombre completo repositorio> -t <token OAuth>
+```
 
 ### Recursos
 
