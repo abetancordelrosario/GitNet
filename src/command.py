@@ -106,9 +106,9 @@ class Command:
 
     def show_help(self) -> None:
         print("""
-        user        --> Get most important users with PageRak algorithm.
+        users        --> Get most important users with PageRak algorithm.
         
-        repo        --> Get most important repositories with personalized PageRank algorithm. 
+        repos        --> Get most important repositories with personalized PageRank algorithm. 
                         The personalization vector benefit repos with more than 1000 stargazers,
                         more than 100 forks and those that have been created in the last year.
                 
@@ -126,6 +126,6 @@ class Command:
         save        --> Save the graph. The second parameter is the format of the file, gt (recommended), 
                         graphml, xml , dot ,  gml. 
 
-        repos_xgb   --> Predict most important repositories using XGBoost modell.
+        repos_xgb   --> Predict most important repositories using XGBoost model.
         
         """)
